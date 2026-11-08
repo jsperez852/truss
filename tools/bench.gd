@@ -64,6 +64,7 @@ func _initialize() -> void:
 	_bench_mediator(0)
 	_bench_mediator(2)
 	_bench_container()
+	_bench_stats()
 	quit()
 
 
@@ -141,3 +142,24 @@ func _bench_container() -> void:
 	for i: int in _iterations:
 		Counter.new()
 	_row("plain Counter.new()", start)
+
+
+func _bench_stats() -> void:
+	var stat := TrStat.new(10.0)
+	for i: int in 5:
+		stat.add(TrModifier.flat(1.0, &"item%d" % i))
+	stat.add(TrModifier.percent(0.2, &"buff"))
+	var total: float = 0.0
+	var start: int = Time.get_ticks_usec()
+	for i: int in _iterations:
+		total += stat.value
+	_row("TrStat.value read (cached, 6 modifiers)", start)
+	var source := RefCounted.new()
+	start = Time.get_ticks_usec()
+	for i: int in _iterations / 10:
+		stat.add(TrModifier.flat(1.0, source))
+		stat.remove_from(source)
+	var per_call: float = float(Time.get_ticks_usec() - start) / float(_iterations / 10)
+	print("| TrStat add + remove_from (recomputes twice) | %.3f |" % per_call)
+	if total < 0.0:
+		print(total)

@@ -8,6 +8,9 @@ and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, mino
 ### Added
 - `content`: `TrRegistry` (scan with `ResourceLoader.list_directory`, `by_id`, `where`, `pick_weighted`,
   `instantiate` with `duplicate_deep`, `skipped`), with `tools/test_export.sh` checking an exported `.pck` in CI.
+- `stats`: `TrStat` (cached `(base + flat) × (1 + Σ percent) × Π multiply` with limits, `changed` only on real
+  changes, weakly referenced object sources), `TrModifier`, `TrStats` (declared keys, errors listing valid names,
+  `remove_from` across stats, `snapshot`) and `TrModifierDef` for inspector-authored modifiers.
 
 ### Changed
 - `TrContracts.describe()` names inner classes of named scripts `Outer.Inner` (also nested), so modules and events

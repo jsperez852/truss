@@ -21,6 +21,8 @@ not with other machines. CI prints the same table for every push in the job summ
 | `TrServiceContainer.get_service` (created singleton) | 1.52 |
 | `TrServiceContainer.get_service` (transient) | 8.57 |
 | plain `Counter.new()` | 0.79 |
+| `TrStat.value` read (cached, 6 modifiers) | 0.19 |
+| `TrStat.add` + `remove_from` (two recomputes) | 15.3 |
 
 ## Reading the numbers
 

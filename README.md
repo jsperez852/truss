@@ -23,6 +23,7 @@ without changing the language or fighting the editor.
 | `messaging` | ✅ M1, M4 | Typed `TrEvent` bus; `TrMediator` for commands and queries with `TrBehavior` pipelines; `send_async` for handlers that `await` |
 | `modules` | ✅ M2 | `TrModule` per feature, `TrBootstrap` composition root with dependency-ordered startup, `Truss` autoload with automatic `_inject()` before `_ready()` |
 | `content` | ✅ 0.5 | `TrRegistry`: a Resource database (scan, by id, where, weighted pick, private copies) that also works in exported builds |
+| `stats` | ✅ 0.5 | `TrStat` and `TrStats`: base values with flat, percent and multiply modifiers by source, cached, declared keys; `TrModifierDef` for the inspector |
 | `fsm` | ✅ M4 | Hierarchical node-based `TrStateMachine` with transitions by state class, queued transitions and history |
 | `tooling` | ✅ M3, M4 | Strict typing profile, generators (module, use case, port, event), `arch_check.gd` (layers, features, forbidden classes, JUnit), and a **Truss** tab in the editor's Debugger panel |
 
@@ -70,6 +71,7 @@ if result.is_err():
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
 - [modules](docs/guide/modules.md): `TrModule`, `TrBootstrap`, the `Truss` autoload and automatic injection
 - [content](docs/guide/content.md): `TrRegistry`
+- [stats](docs/guide/stats.md): `TrStat`, `TrModifier`, `TrStats`, `TrModifierDef`
 - [fsm](docs/guide/fsm.md): `TrStateMachine`, `TrState`
 - [tooling](docs/guide/tooling.md): strict profile, generators, `arch_check`
 - [examples/minimal](examples/minimal): a feature through every layer, with failure modes
