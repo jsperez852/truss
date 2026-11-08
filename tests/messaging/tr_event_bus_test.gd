@@ -53,6 +53,7 @@ func test_handlers_of_freed_objects_are_dropped() -> void:
 	script.reload()
 	var node := Node.new()
 	node.set_script(script)
+	add_child(node)
 	bus.subscribe(FxHit, Callable(node, &"on_hit"))
 	assert_int(bus.publish(FxHit.new(1))).is_equal(1)
 	node.free()

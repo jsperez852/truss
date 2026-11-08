@@ -36,7 +36,7 @@ out="$(tool strict_profile.gd --include-addons)"; code=$?
 
 # --- generators -----------------------------------------------------------
 gen_ok=1
-for args in "module inventory" "usecase inventory AddItem" "port inventory InventoryStore" "event inventory ItemAdded" "module shop"; do
+for args in "module inventory" "usecase inventory AddItem" "port inventory InventoryStore" "event inventory ItemAdded" "event inventory ItemRemoved item_id:StringName amount:int" "module shop"; do
 	out="$(tool generate.gd $args)"; code=$?
 	[ $code = 0 ] || { gen_ok=0; bad "generate $args (exit $code)" "$out"; }
 done
@@ -45,6 +45,8 @@ out="$(tool generate.gd usecase inventory AddItem)"; code=$?
 [ $code = 1 ] && grep -q "already exists" <<<"$out" && pass "generator refuses to overwrite" || bad "generator overwrite check (exit $code)" "$out"
 out="$(tool generate.gd usecase)"; code=$?
 [ $code = 2 ] && pass "generator usage error" || bad "generator usage (exit $code)" "$out"
+out="$(tool generate.gd event inventory Broken amount)"; code=$?
+[ $code = 2 ] && grep -q "name:Type" <<<"$out" && pass "generator rejects malformed event fields" || bad "generator event field check (exit $code)" "$out"
 for f in features/inventory/inventory_module.gd features/inventory/application/add_item_request.gd \
 	features/inventory/application/add_item_handler.gd features/inventory/application/ports/inventory_store.gd \
 	features/inventory/infrastructure/memory_inventory_store.gd features/inventory/application/events/item_added.gd; do
@@ -59,7 +61,7 @@ func _initialize() -> void:
 	for path: String in ["res://features/inventory/inventory_module.gd", "res://features/inventory/application/add_item_request.gd",
 			"res://features/inventory/application/add_item_handler.gd", "res://features/inventory/application/ports/inventory_store.gd",
 			"res://features/inventory/infrastructure/memory_inventory_store.gd", "res://features/inventory/application/events/item_added.gd",
-			"res://features/shop/shop_module.gd"]:
+			"res://features/inventory/application/events/item_removed.gd", "res://features/shop/shop_module.gd"]:
 		var s: Script = load(path)
 		if s == null or not (s.can_instantiate() or (s as GDScript).is_abstract()):
 			printerr("FAILED ", path)
@@ -67,11 +69,13 @@ func _initialize() -> void:
 	var handler: TrRequestHandler = (load("res://features/inventory/application/add_item_handler.gd") as GDScript).new()
 	var request: TrRequest = (load("res://features/inventory/application/add_item_request.gd") as GDScript).new()
 	print("handles=", TrContracts.describe(handler.handles()), " result=", handler.handle(request))
+	var removed: TrEvent = (load("res://features/inventory/application/events/item_removed.gd") as GDScript).new(&"potion", 2)
+	print("event=", removed.get(&"item_id"), "x", removed.get(&"amount"))
 	quit(1 if failures > 0 else 0)
 EOF
 run --import > /dev/null
 out="$(run -s res://compile.gd)"; code=$?
-[ $code = 0 ] && grep -q "handles=AddItemRequest result=TrResult.failure(not_implemented" <<<"$out" && pass "generated code compiles and runs (strict)" || bad "generated code (exit $code)" "$out"
+[ $code = 0 ] && grep -q "handles=AddItemRequest result=TrResult.failure(not_implemented" <<<"$out" && grep -q "event=potionx2" <<<"$out" && pass "generated code compiles and runs (strict)" || bad "generated code (exit $code)" "$out"
 rm "$P/compile.gd"
 
 # --- arch_check -----------------------------------------------------------

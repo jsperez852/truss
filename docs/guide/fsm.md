@@ -1,4 +1,33 @@
-# fsm: TrStateMachine and TrState
+# fsm: TrStateMachine, TrState and TrPhases
+
+Two machines: `TrPhases` for game phases written in a few lines of code, and `TrStateMachine` for characters and
+AI where every state is a node with its own exports, substates, input and physics.
+
+## TrPhases: phases in code
+
+```gdscript
+var phase := TrPhases.new()
+
+func _ready() -> void:
+	phase.add(&"ready")
+	phase.add(&"playing", {enter = _start_spawning})
+	phase.add(&"crashed", {enter = _stop_world, to = [&"over"]})
+	phase.add(&"over", {enter = _show_results})
+	phase.start(&"ready")
+
+func _on_player_crashed() -> void:
+	phase.go(&"crashed")
+```
+
+- Options: `enter` (receives the previous phase, or nothing), `exit` (receives the next phase, or nothing),
+  `update` (receives `delta`, or nothing; call `phase.update(delta)` from `_process`), `to` (phases allowed next).
+- `go()` returns `false` for the current phase or one not in `to`; unknown phases are errors.
+  `go()` inside `enter`/`exit` runs after the current transition.
+- `current()`, `is_in()`, `is_in_any()`, `can_go()`, `elapsed()` (seconds in the phase, counted by `update`) and
+  the `changed(previous, current)` signal.
+- Move to `TrStateMachine` when a phase needs its own exported values, substates or input handling.
+
+## TrStateMachine
 
 A hierarchical state machine made of nodes. States are `TrState` children of a `TrStateMachine`; a state with
 child states is a parent state. Transitions are requested **by class**: `machine.transition_to(EnemyChase)`.

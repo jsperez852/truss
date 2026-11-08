@@ -6,9 +6,20 @@ matches the game. Every level keeps working when you move to the next one.
 
 | Level | For | Uses | Skips |
 |---|---|---|---|
-| 1. Arcade | Pong, Flappy-style, game jams | `TrEventBus` in one autoload, `TrResult`, optionally a `TrStateMachine` for the game phase, `Truss.pause` | DI, modules, mediator, plugin settings |
+| 0. None | Pong, a one-scene jam game | Godot signals and a script per scene | All of Truss |
+| 1. Arcade | Flappy-style, small arcade games with a few screens | `TrEventBus` in one autoload, `TrResult`, `TrPhases` for the game phase, `Truss.pause` | DI, modules, mediator, plugin settings |
 | 2. Mid-size | Platformers, small roguelites, idle games | Level 1 + `TrRegistry` for content, `TrStats` for numbers, pause tokens and lifecycle events | Modules, mediator, `arch_check` |
 | 3. Full | Games with many features or several people | Everything: modules, DI and `_inject`, mediator, `arch_check`, generators | Nothing |
+
+## Level 0: you don't need Truss
+
+If the game is one scene where every node can reach the others through its parent, plain signals are the
+right tool. In a Pong pilot, moving the score to the bus took an autoload, an event class and a label script
+to remove three lines. Stay at level 0 until one of these shows up:
+
+- Two systems that don't share a parent need to react to the same fact (score, death, checkpoint) → level 1 bus.
+- The game phase is a set of bools (`is_playing`, `is_dead`, `can_restart`) → level 1 `TrPhases`.
+- Saving or loading can fail and nobody checks → `TrResult`.
 
 ## Level 1: arcade
 
@@ -56,17 +67,40 @@ func _ready() -> void:
 	Game.bus.subscribe(Events.ScoreChanged, _on_score_changed)
 
 
-func _exit_tree() -> void:
-	Game.bus.unsubscribe_all(self)
-
-
 func _on_score_changed(event: Events.ScoreChanged) -> void:
 	text = "Score: %d" % event.score
 ```
 
-Publishing: `Game.bus.publish(Events.ScoreChanged.new(score))`. A game phase with three bool flags
-(`is_playing`, `is_dead`, `can_restart`) is a good candidate for a small `TrStateMachine` with `Ready`, `Playing` and
-`Dead` states (see [fsm](fsm.md)).
+Publishing: `Game.bus.publish(Events.ScoreChanged.new(score))`. No `_exit_tree()` unsubscribe: freed nodes
+are dropped and nodes outside the tree are skipped. Handlers that don't need the event can omit the argument
+(`func _on_player_died() -> void`).
+
+A game phase with three bool flags (`is_playing`, `is_dead`, `can_restart`) fits a `TrPhases` in the main scene:
+
+```gdscript
+# file: res://main.gd
+extends Node2D
+
+var phase := TrPhases.new()
+
+
+func _ready() -> void:
+	phase.add(&"ready")
+	phase.add(&"playing", {enter = _on_playing})
+	phase.add(&"dead", {enter = _on_dead, to = [&"ready"]})
+	phase.start(&"ready")
+	Game.bus.subscribe(Events.PlayerDied, func() -> void: phase.go(&"dead"))
+
+
+func _on_playing() -> void:
+	$Spawner.set_process(true)
+
+
+func _on_dead() -> void:
+	$Spawner.set_process(false)
+```
+
+Use a node-based `TrStateMachine` instead when the phases need exported values or substates (see [fsm](fsm.md)).
 
 Pause without the plugin: `Truss.pause` needs the `Truss` autoload. If you don't enable the plugin, create one
 yourself: `var pause := TrPause.new(get_tree())` in `Game._ready()`.
@@ -119,6 +153,7 @@ is a complete game at this level.
 
 ## Signs it's time for the next level
 
+- Two unrelated nodes need the same fact and you're wiring signals through a parent that doesn't care → level 1.
 - Several autoloads reach into each other, or one autoload holds most of the game state → level 3.
 - The same "load every `.tres` in a folder" or "sum the modifiers" code appears twice → level 2.
 - Scenes can't run alone (F6) because they need globals set up by another scene → level 3 with `_inject` and test doubles.

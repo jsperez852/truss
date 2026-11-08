@@ -64,7 +64,7 @@ func test_freed_source_subscription_is_dropped() -> void:
 func test_invalid_options() -> void:
 	var out: Array[bool] = []
 	await assert_error(func() -> void: out.append(bus.subscribe(FxHit, _rec("x"), {prio = 1}))) \
-		.is_push_error("TrEventBus.subscribe(): unknown option prio (valid: priority, source)")
+		.is_push_error("TrEventBus.subscribe(): unknown option prio (valid: priority, source, outside_tree)")
 	await assert_error(func() -> void: out.append(bus.subscribe(FxHit, _rec("y"), {priority = "high"}))) \
 		.is_push_error("TrEventBus.subscribe(): priority must be an int, got String")
 	assert_array(out).contains_exactly([false, false])

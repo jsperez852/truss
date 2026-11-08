@@ -5,11 +5,11 @@ extends SceneTree
 ##   module  <feature>          features/<feature>/<feature>_module.gd and the layer folders
 ##   usecase <feature> <Name>   application/<name>_request.gd and <name>_handler.gd (TrRequest + TrRequestHandler)
 ##   port    <feature> <Name>   application/ports/<name>.gd (@abstract) and infrastructure/memory_<name>.gd
-##   event   <feature> <Name>   application/events/<name>.gd (TrEvent)
+##   event   <feature> <Name> [field:Type ...]   application/events/<name>.gd (TrEvent with typed fields)
 ## Options: --root=res://features (base folder), --dry-run (print paths only).
 ## Exit codes: 0 written, 1 a file already exists (nothing written), 2 usage error.
 
-const USAGE: String = "usage: generate.gd -- <module|usecase|port|event> <feature> [Name] [--root=res://features] [--dry-run]"
+const USAGE: String = "usage: generate.gd -- <module|usecase|port|event> <feature> [Name] [field:Type ...] [--root=res://features] [--dry-run]"
 
 var _root: String = "res://features"
 var _dry_run: bool = false
@@ -52,8 +52,15 @@ func _initialize() -> void:
 				files = _port(feature, type_name)
 				hint = "Register an adapter in %sModule.register():\n\tc.singleton(%s, func() -> %s: return Memory%s.new())" % [feature.to_pascal_case(), type_name, type_name, type_name]
 			else:
-				files = _event(feature, type_name)
-				hint = "Publish it with bus.publish(%s.new()) and subscribe with bus.subscribe(%s, handler)" % [type_name, type_name]
+				var fields: PackedStringArray = positional.slice(3)
+				for field: String in fields:
+					if not _valid_field(field):
+						printerr("generate: event fields are name:Type (for example amount:int), got %s" % field)
+						quit(2)
+						return
+				files = _event(feature, type_name, fields)
+				var example: String = "%s.new(%s)" % [type_name, ", ".join(_field_names(fields))]
+				hint = "Publish it with bus.publish(%s) and subscribe with bus.subscribe(%s, handler)" % [example, type_name]
 		_:
 			printerr("generate: unknown command %s\n%s" % [command, USAGE])
 			quit(2)
@@ -162,15 +169,48 @@ extends %s
 	return files
 
 
-func _event(feature: String, type_name: String) -> Dictionary[String, String]:
+func _event(feature: String, type_name: String, fields: PackedStringArray = []) -> Dictionary[String, String]:
 	var path: String = _root.path_join(feature).path_join("application/events").path_join(type_name.to_snake_case() + ".gd")
 	var files: Dictionary[String, String] = {}
-	files[path] = """class_name %s
+	var text: String = "class_name %s
 extends TrEvent
-## A fact the %s feature announces (past tense). Add typed fields and set them in _init().
+## A fact the %s feature announces (past tense).
+" % [type_name, feature]
+	if fields.is_empty():
+		files[path] = text
+		return files
+	var declarations := PackedStringArray()
+	var params := PackedStringArray()
+	var assignments := PackedStringArray()
+	for field: String in fields:
+		var field_name: String = field.get_slice(":", 0)
+		var field_type: String = field.get_slice(":", 1)
+		declarations.append("var %s: %s" % [field_name, field_type])
+		params.append("p_%s: %s" % [field_name, field_type])
+		assignments.append("	%s = p_%s" % [field_name, field_name])
+	text += "
+%s
 
 
-func _init() -> void:
-	pass
-""" % [type_name, feature]
+func _init(%s) -> void:
+%s
+" % ["
+".join(declarations), ", ".join(params), "
+".join(assignments)]
+	files[path] = text
 	return files
+
+
+func _valid_field(field: String) -> bool:
+	if field.get_slice_count(":") != 2:
+		return false
+	var type_text: String = field.get_slice(":", 1)
+	var type_regex := RegEx.create_from_string(r"^[A-Za-z_][A-Za-z0-9_.]*(\[[A-Za-z_][A-Za-z0-9_.]*(, ?[A-Za-z_][A-Za-z0-9_.]*)?\])?$")
+	return _valid_identifier(field.get_slice(":", 0)) and type_regex.search(type_text) != null
+
+
+func _field_names(fields: PackedStringArray) -> PackedStringArray:
+	var out := PackedStringArray()
+	for field: String in fields:
+		out.append(field.get_slice(":", 0))
+	return out

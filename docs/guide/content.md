@@ -44,7 +44,7 @@ exported: naive_dir_access=0 registry_ok=true registry=3 ids=elixir,potion,sword
 
 | Method | Notes |
 |---|---|
-| `TrRegistry.new(type: Script, id_property = &"id")` | The id is the `id_property` value when the resource has it, otherwise the file name without extension |
+| `TrRegistry.new(type, id_property = &"id")` (`type`: a Resource script, a native class such as `Curve`, or its name `&"Curve"`) | The id is the `id_property` value when the resource has it, otherwise the file name without extension |
 | `scan(folder, recursive = true) -> TrResult` | Success holds how many were added. Resources of other types are skipped (`skipped()` lists them). Load failures, missing ids and duplicate ids make it a failure; the valid ones are still added. A missing folder is `not_a_folder` |
 | `add(resource, id = &"") -> TrResult` | For content built in code or in tests |
 | `all()`, `by_id(id)`, `has(id)`, `ids()`, `size()`, `where(predicate)` | Return the **shared** definitions: treat them as read-only |

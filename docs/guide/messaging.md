@@ -22,14 +22,19 @@ bus.publish(EnemyDied.new(&"slime"))
 func _on_enemy_died(event: EnemyDied) -> void:
 	kills += 1
 
-func _exit_tree() -> void:
-	bus.unsubscribe_all(self)
+bus.subscribe(PlayerDied, _on_player_died)
+
+func _on_player_died() -> void:        # no event argument when the handler doesn't need it
+	lives -= 1
 ```
 
 - Subscribing to a base event class also receives its subclasses.
 - Subscribing the same callable twice has no effect. Only `TrEvent` subclasses are accepted.
-- Handlers whose object was freed are dropped automatically. Still unsubscribe in `_exit_tree()` so a node
-  removed from the tree (but not freed) stops receiving events.
+- A handler takes the event as its only argument, or no argument. Handlers with two or more arguments are rejected.
+- Handlers whose object was freed are dropped automatically, so `queue_free()` is enough: no `_exit_tree()`
+  unsubscribe. Handlers bound to a node are skipped while the node is outside the tree (removed, pooled, being
+  reparented) and resume when it comes back. Pass `{outside_tree = true}` to deliver anyway.
+  `unsubscribe_all(self)` is still there to stop listening while staying in the tree.
 - Unsubscribing during `publish()` takes effect immediately; subscribing during `publish()` applies from the next event.
 - `publish()` returns how many handlers ran.
 

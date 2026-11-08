@@ -14,7 +14,12 @@ extends RefCounted
 ##
 ## func _on_enemy_died(event: EnemyDied) -> void:
 ##     kills += 1
+##
+## func _on_player_died() -> void:                               # handlers may skip the event argument
+##     lives -= 1
 ## [/codeblock]
+## Handlers bound to a [Node] are skipped while the node is outside the scene tree and dropped when it is freed,
+## so nodes don't need to unsubscribe in [code]_exit_tree()[/code].
 ## Order: higher [code]priority[/code] first (default 0); for equal priorities, handlers of the event's own class
 ## before handlers of its base classes, then subscription order.
 ## Prefer local signals between nodes that share a parent. Use the bus for facts that unrelated systems care about.
@@ -23,7 +28,7 @@ extends RefCounted
 ## (used by the editor debugger tab). Costs one signal emit per publish.
 signal published(event: TrEvent)
 
-const OPTION_KEYS: PackedStringArray = ["priority", "source"]
+const OPTION_KEYS: PackedStringArray = ["priority", "source", "outside_tree"]
 
 
 class Subscription:
@@ -33,13 +38,26 @@ class Subscription:
 	var sequence: int = 0
 	var has_source: bool = false
 	var source_ref: WeakRef
+	var pass_event: bool = true
+	var node_ref: WeakRef
 	var active: bool = true
 
 	func is_alive() -> bool:
 		return active and handler.is_valid() and (not has_source or source_ref.get_ref() != null)
 
 	func accepts(source: Object) -> bool:
-		return not has_source or (source != null and source_ref.get_ref() == source)
+		if has_source and (source == null or source_ref.get_ref() != source):
+			return false
+		if node_ref == null:
+			return true
+		var node: Node = node_ref.get_ref() as Node
+		return node != null and node.is_inside_tree()
+
+	func deliver(event: TrEvent) -> void:
+		if pass_event:
+			handler.call(event)
+		else:
+			handler.call()
 
 
 var _subscriptions: Dictionary[Script, Array] = {}
@@ -47,10 +65,13 @@ var _dispatch_cache: Dictionary[Script, Array] = {}
 var _sequence: int = 0
 
 
-## Subscribes [param handler] (a [Callable] taking one argument) to [param event_type] and its subclasses.
-## [param options]: [code]priority[/code] (int, default 0, higher runs first) and [code]source[/code] (an Object:
-## only events published with that same source are delivered). Subscribing the same handler to the same type
-## twice has no effect. Returns [code]false[/code] if the arguments are invalid.
+## Subscribes [param handler] to [param event_type] and its subclasses. The handler takes the event as its only
+## argument, or no argument at all when it doesn't need it.
+## [param options]: [code]priority[/code] (int, default 0, higher runs first), [code]source[/code] (an Object:
+## only events published with that same source are delivered) and [code]outside_tree[/code] (bool, default
+## [code]false[/code]: handlers bound to a Node are skipped while the node is outside the tree; [code]true[/code]
+## delivers anyway). Subscribing the same handler to the same type twice has no effect. Returns [code]false[/code]
+## if the arguments are invalid.
 func subscribe(event_type: Script, handler: Callable, options: Dictionary = {}) -> bool:
 	if not _is_event_script(event_type):
 		push_error("TrEventBus.subscribe(): %s is not a TrEvent subclass" % TrContracts.describe(event_type))
@@ -62,12 +83,25 @@ func subscribe(event_type: Script, handler: Callable, options: Dictionary = {}) 
 		if not OPTION_KEYS.has(str(key)):
 			push_error("TrEventBus.subscribe(): unknown option %s (valid: %s)" % [str(key), ", ".join(OPTION_KEYS)])
 			return false
+	var arg_count: int = handler.get_argument_count()
+	if arg_count > 1:
+		push_error("TrEventBus.subscribe(): handler for %s takes %d arguments (expected the event, or none)" % [TrContracts.describe(event_type), arg_count])
+		return false
+	var outside_tree: Variant = options.get("outside_tree", false)
+	if typeof(outside_tree) != TYPE_BOOL:
+		push_error("TrEventBus.subscribe(): outside_tree must be a bool, got %s" % type_string(typeof(outside_tree)))
+		return false
 	var list: Array = _subscriptions.get_or_add(event_type, [])
 	for existing: Subscription in list:
 		if existing.active and existing.handler == handler:
 			return true
 	var sub := Subscription.new()
 	sub.handler = handler
+	sub.pass_event = arg_count == 1
+	var target: Object = handler.get_object()
+	var deliver_outside: bool = outside_tree
+	if target is Node and not deliver_outside:
+		sub.node_ref = weakref(target)
 	var priority: Variant = options.get("priority", 0)
 	if typeof(priority) != TYPE_INT:
 		push_error("TrEventBus.subscribe(): priority must be an int, got %s" % type_string(typeof(priority)))
@@ -102,7 +136,8 @@ func unsubscribe(event_type: Script, handler: Callable) -> void:
 	_dispatch_cache.clear()
 
 
-## Removes every subscription whose callable is bound to [param target] (for example in [code]_exit_tree()[/code]).
+## Removes every subscription whose callable is bound to [param target]. Nodes rarely need it: their handlers
+## are skipped outside the tree and dropped when they are freed.
 func unsubscribe_all(target: Object) -> void:
 	for event_type: Script in _subscriptions:
 		var list: Array = _subscriptions[event_type]
@@ -131,7 +166,7 @@ func publish(event: TrEvent, source: Object = null) -> int:
 			has_dead = true
 			continue
 		if sub.accepts(event.source):
-			sub.handler.call(event)
+			sub.deliver(event)
 			called += 1
 	if has_dead:
 		_prune()

@@ -37,7 +37,7 @@ variable instead) and typed-array arguments built from untyped values.
 godot --headless --path . -s res://addons/truss/tooling/generate.gd -- module inventory
 godot --headless --path . -s res://addons/truss/tooling/generate.gd -- usecase inventory AddItem
 godot --headless --path . -s res://addons/truss/tooling/generate.gd -- port inventory InventoryStore
-godot --headless --path . -s res://addons/truss/tooling/generate.gd -- event inventory ItemAdded
+godot --headless --path . -s res://addons/truss/tooling/generate.gd -- event inventory ItemAdded item_id:StringName amount:int
 ```
 
 | Command | Creates (under `res://features/<feature>/`) |
@@ -45,7 +45,7 @@ godot --headless --path . -s res://addons/truss/tooling/generate.gd -- event inv
 | `module <feature>` | `<feature>_module.gd` (`<Feature>Module extends TrModule`) and empty `domain/`, `application/`, `infrastructure/`, `presentation/` folders |
 | `usecase <feature> <Name>` | `application/<name>_request.gd` (`<Name>Request extends TrRequest`) and `application/<name>_handler.gd` (`<Name>Handler extends TrRequestHandler`, returns `not_implemented`) |
 | `port <feature> <Name>` | `application/ports/<name>.gd` (`@abstract class_name <Name>`) and `infrastructure/memory_<name>.gd` (`Memory<Name>`) |
-| `event <feature> <Name>` | `application/events/<name>.gd` (`<Name> extends TrEvent`) |
+| `event <feature> <Name> [field:Type ...]` | `application/events/<name>.gd` (`<Name> extends TrEvent`, with typed fields and an `_init` that sets them) |
 
 Each command prints the line to add to the module. Generators never overwrite: if any target file exists,
 nothing is written and the exit code is 1. `--root=res://game/features` changes the base folder, `--dry-run`

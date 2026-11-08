@@ -112,3 +112,21 @@ func test_add_in_code_and_type_check() -> void:
 	assert_array(reg.ids()).contains_exactly([&"bow"])
 	reg.clear()
 	assert_int(reg.size()).is_equal(0)
+
+
+func test_native_class_types() -> void:
+	var all_resources := TrRegistry.new(Resource)
+	all_resources.scan(ROOT)
+	assert_int(all_resources.size()).is_equal(5)
+	assert_array(all_resources.skipped()).is_empty()
+	var curves := TrRegistry.new(Curve)
+	var curve := Curve.new()
+	assert_bool(curves.add(curve, &"ease").ok).is_true()
+	assert_bool(curves.add(Gradient.new(), &"grad").ok).is_false()
+	var by_name := TrRegistry.new(&"Curve")
+	assert_bool(by_name.add(Curve.new(), &"ease").ok).is_true()
+	assert_object(curves.instantiate(&"ease")).is_instanceof(Curve)
+
+
+func test_non_resource_types_are_reported() -> void:
+	await assert_error(func() -> void: TrRegistry.new(&"Node")).is_push_error("TrRegistry.new(): Node is not a Resource script or class")

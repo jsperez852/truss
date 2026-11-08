@@ -3,6 +3,24 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
+## 0.5.1 — 2026-11-08 (pilot adjustments)
+
+Adjustments from migrating four real projects (Pong, Flappy-style, platformer, idle tycoon) to Truss.
+
+### Added
+- `fsm`: `TrPhases`, a phase machine written in code (`add` with `enter`/`exit`/`update`/`to`, `start`, `go`,
+  `can_go`, `elapsed`, `changed`), for game phases that don't need a node per state.
+- `TrEventBus`: handlers may take no argument; option `outside_tree`.
+- `TrRegistry.new()` accepts native Resource classes (`TrRegistry.new(Curve)`) and class names (`&"Curve"`).
+- `generate.gd event <feature> <Name> field:Type ...` writes typed fields and the `_init` that sets them.
+- Truss Lite guide: level 0 ("you don't need Truss") and `TrPhases` at level 1.
+
+### Changed
+- `TrEventBus`: handlers bound to a Node are skipped while the node is outside the scene tree (they resume when it
+  returns). Freed nodes were already dropped, so the guides no longer ask for an `_exit_tree()` unsubscribe.
+  Pass `{outside_tree = true}` for the previous behavior.
+- `TrEventBus.subscribe()` rejects handlers with two or more arguments instead of failing on publish.
+
 ## 0.5.0 — 2026-11-08 (RFC 0002)
 
 ### Added
