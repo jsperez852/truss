@@ -41,6 +41,12 @@ func handle_input(_event: InputEvent) -> bool:
 	return false
 
 
+## Receives intents sent with [method TrStateMachine.send_intent] (from player input or AI), leaf first.
+## Return [code]true[/code] when handled, to stop it from reaching parent states.
+func handle_intent(_intent: StringName, _data: Dictionary) -> bool:
+	return false
+
+
 func update(_delta: float) -> void:
 	pass
 

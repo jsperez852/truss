@@ -11,3 +11,7 @@ extends RefCounted
 ## func _init(type: StringName) -> void:
 ##     enemy_type = type
 ## [/codeblock]
+
+## Who published the event, when it was published with [code]bus.publish(event, source)[/code]. Handlers
+## subscribed with a [code]source[/code] option only receive events whose source is that same object.
+var source: Object

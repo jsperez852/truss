@@ -15,6 +15,10 @@ and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, mino
   released when freed, stacking `hit_stop` relative to the game's time scale, `reset`), `TrAppEvents` published on
   the bus and emitted as `Truss.app_event`, setting `truss/lifecycle/pause_on_focus_loss`, and pause changes in
   the debugger tab.
+- `TrEventBus.subscribe(type, handler, {priority, source})` and `publish(event, source)`: priority across the class
+  hierarchy, source filtering, `TrEvent.source`, cached dispatch order.
+- `TrStateMachine.transition_to(state, args)` with `transition_args`, and `send_intent(intent, data)` with
+  `TrState.handle_intent()` bubbling from the leaf.
 
 ### Changed
 - `TrContracts.describe()` names inner classes of named scripts `Outer.Inner` (also nested), so modules and events

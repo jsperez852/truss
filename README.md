@@ -20,12 +20,12 @@ without changing the language or fighting the editor.
 |---|---|---|
 | `core` | ✅ M1 | `TrResult` for expected errors, `TrOption`, `TrContracts` on top of native `@abstract` ports |
 | `di` | ✅ M1 | `TrServiceContainer`: singleton, scoped, transient and instance lifetimes, scopes, cycle detection, startup validation |
-| `messaging` | ✅ M1, M4 | Typed `TrEvent` bus; `TrMediator` for commands and queries with `TrBehavior` pipelines; `send_async` for handlers that `await` |
+| `messaging` | ✅ M1, M4 | Typed `TrEvent` bus; `TrMediator` for commands and queries with `TrBehavior` pipelines; `send_async` for handlers that `await`; event priority and source filtering (0.5) |
 | `modules` | ✅ M2 | `TrModule` per feature, `TrBootstrap` composition root with dependency-ordered startup, `Truss` autoload with automatic `_inject()` before `_ready()` |
 | `content` | ✅ 0.5 | `TrRegistry`: a Resource database (scan, by id, where, weighted pick, private copies) that also works in exported builds |
 | `stats` | ✅ 0.5 | `TrStat` and `TrStats`: base values with flat, percent and multiply modifiers by source, cached, declared keys; `TrModifierDef` for the inspector |
 | `time` | ✅ 0.5 | `Truss.pause`: pause tokens that never unpause under another holder, stacking hit stop; `TrAppEvents` for focus, mobile pause/resume and quit, with optional pause on focus loss |
-| `fsm` | ✅ M4 | Hierarchical node-based `TrStateMachine` with transitions by state class, queued transitions and history |
+| `fsm` | ✅ M4 | Hierarchical node-based `TrStateMachine` with transitions by state class, queued transitions and history; transition arguments and intents (0.5) |
 | `tooling` | ✅ M3, M4 | Strict typing profile, generators (module, use case, port, event), `arch_check.gd` (layers, features, forbidden classes, JUnit), and a **Truss** tab in the editor's Debugger panel |
 
 Every piece is optional. Nothing runs per frame unless you call it.

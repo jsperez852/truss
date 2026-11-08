@@ -42,6 +42,39 @@ func physics_update(_delta: float) -> void:
 `enter(previous)` receives the leaf that was active before, and `exit(next)` the leaf that will be active.
 The `transitioned(from, to)` signal fires after each transition.
 
+## Transition arguments
+
+```gdscript
+machine.transition_to(EnemyHurt, {hitstun = 0.3, knockback = Vector2(120, 0)})
+
+# in EnemyHurt
+func enter(_previous: TrState) -> void:
+	var stun: float = machine.transition_args.get(&"hitstun", 0.2)
+```
+
+`transition_args` is set before the `exit`/`enter` calls of a transition and stays until the next transition.
+Queued transitions keep their own arguments. Lua-style keys (`{hitstun = 0.3}`) are `StringName`s, and GDScript
+dictionaries treat `"hitstun"` and `&"hitstun"` as the same key, so either works with `get()`.
+
+## Intents
+
+Player input and AI can drive the same states with intents instead of `InputEvent`s:
+
+```gdscript
+machine.send_intent(&"attack")                 # from the player script or an AI behavior
+machine.send_intent(&"move", {direction = Vector2.LEFT})
+
+# in a state
+func handle_intent(intent: StringName, data: Dictionary) -> bool:
+	if intent == &"attack":
+		machine.transition_to(PlayerAttack)
+		return true
+	return false
+```
+
+The active leaf gets it first, then its parents, until one returns `true`. `send_intent` returns whether a state
+handled it.
+
 ## Inspecting
 
 - `current()`, `active_path()`, `is_in(state)`, `is_in_class(EnemyAlive)`, `find_state(EnemyChase)`.
