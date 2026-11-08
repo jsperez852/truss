@@ -35,12 +35,12 @@ jobs:
       - name: Compile check (strict on 4.7+)
         run: godot --headless --path . -s res://tools/compile_check.gd
 
+      # runtest.sh needs GODOT_BIN to be a path to an existing file, not a command name.
+      # setup-godot exports that path as $GODOT.
       - name: Unit tests (gdUnit4)
         run: |
           chmod +x addons/gdUnit4/runtest.sh
-          addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
-        env:
-          GODOT_BIN: godot
+          GODOT_BIN="$GODOT" addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
 
       - name: Benchmarks
         if: matrix.godot == '4.7.2'

@@ -74,7 +74,7 @@ if result.is_err():
 bash tools/install_gdunit.sh                                   # gdUnit4 v6.2.3 into addons/gdUnit4 (not committed)
 godot --headless --path . --import
 godot --headless --path . -s res://tools/compile_check.gd      # strict typing applies to addons/truss on 4.7+
-GODOT_BIN=godot addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
+GODOT_BIN="$(command -v godot)" addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
 godot --headless --path . -s res://tools/bench.gd
 ```
 
