@@ -1,0 +1,21 @@
+name: Feature request
+description: A piece or option Truss could add.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The game problem
+      description: What you're building and what's hard today. Code you had to write by hand helps most.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: What you'd like
+      description: An API sketch is welcome, but optional.
+  - type: dropdown
+    id: level
+    attributes:
+      label: Truss Lite level of your project
+      options: ["0 (no Truss yet)", "1 (one autoload)", "2 (content, stats, economy)", "3 (modules and DI)"]

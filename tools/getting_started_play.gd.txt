@@ -1,0 +1,32 @@
+extends SceneTree
+## Plays one round of the getting-started guide's game (copied in as res://play.gd by check_doc_snippets.sh).
+## Run twice: the second run must find the first run's record.
+
+func _initialize() -> void:
+	_play.call_deferred()
+
+
+func _play() -> void:
+	var main: Control = (load("res://main.gd") as GDScript).new()
+	root.add_child(main)
+	await process_frame
+	var game: Node = root.get_node("Game")
+	var wallet: TrWallet = game.get("wallet")
+	var phase: TrPhases = main.get("phase")
+	var best_before: float = game.get("best")
+	main.call("_on_click_pressed")
+	for i: int in 12:
+		main.call("_on_click_pressed")
+	main.call("_on_upgrade_pressed")
+	for i: int in 5:
+		main.call("_on_click_pressed")
+	main.call("_on_upgrade_pressed")
+	for i: int in 10:
+		main.call("_on_click_pressed")
+	var in_playing: bool = phase.is_in(&"playing")
+	for i: int in 31:
+		phase.update(1.0)
+	var score: float = wallet.balance()
+	print("PLAY best_before=%d playing=%s level=%d score=%d phase=%s best=%d" % [
+		best_before, in_playing, main.get("level"), score, phase.current(), game.get("best")])
+	quit()

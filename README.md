@@ -10,7 +10,10 @@ all in pure GDScript for Godot 4.5+.
 > priorities and sources), `modules`, automatic injection, `fsm` (with arguments and intents, and `TrPhases` for
 > phases in code), `content`, `stats`, `time` (pause tokens, hit stop, lifecycle), `economy` (`TrWallet`,
 > `TrCurve`), `save` (`TrSave`), the editor debugger tab and the tooling. The API may still change before 1.0.
-> Small game? Start with [Truss Lite](docs/guide/lite.md). Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
+> New here? [Getting started](docs/guide/getting-started.md) builds a small game in 15 minutes. Small game? Read
+> [Truss Lite](docs/guide/lite.md). Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
+
+![examples/arena, the example game, played by its autoplay bot in CI](docs/images/arena.png)
 
 ## Why
 
@@ -71,6 +74,7 @@ if result.is_err():
 
 ## Documentation
 
+- [Getting started](docs/guide/getting-started.md): install, events, phases, a wallet, prices per level and a save file in one small game
 - [core](docs/guide/core.md): `TrResult`, `TrOption`, `TrContracts`
 - [di](docs/guide/di.md): `TrServiceContainer`, lifetimes, scopes, validation
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
@@ -94,6 +98,8 @@ if result.is_err():
 
 ## Developing Truss
 
+See [CONTRIBUTING](CONTRIBUTING.md) for how to propose changes and the versioning policy.
+
 ```bash
 bash tools/install_gdunit.sh                                   # gdUnit4 v6.2.3 into addons/gdUnit4 (not committed)
 godot --headless --path . --import
@@ -105,6 +111,7 @@ GODOT="$(command -v godot)" bash tools/test_tooling.sh            # strict profi
 GODOT="$(command -v godot)" bash tools/run_arena.sh               # the example game, played by a bot
 GODOT="$(command -v godot)" bash tools/test_export.sh             # TrRegistry in an exported .pck
 GODOT="$(command -v godot)" bash tools/check_doc_snippets.sh docs/guide/lite.md   # guide code compiles (needs gawk)
+GODOT="$(command -v godot)" bash tools/check_doc_snippets.sh docs/guide/getting-started.md tools/getting_started_play.gd.txt
 ```
 
 Known issue: with the **Windows .NET build of Godot 4.5.1**, the full gdUnit4 run can end with a segmentation fault
@@ -121,7 +128,9 @@ and the standard 4.5.1 build used in CI exit cleanly. The leaked objects reporte
 | M3 ✅ | Tooling: strict profile, `arch_check` v2, generators, Claude Code skill |
 | M4 ✅ | `fsm`, editor panel, async handlers, example game |
 | 0.5 ✅ | Content and gameplay primitives: `TrRegistry`, `TrStat`, pause tokens and app lifecycle, event priority and source, FSM arguments and intents, Truss Lite ([RFC 0002](docs/rfcs/0002-truss-0.5-gameplay-primitives.md)) |
-| 1.0 | Frozen API, complete docs, Asset Library |
+| 0.5.1 ✅ | Pilot adjustments from four real projects: `TrPhases`, handlers without arguments, no `_exit_tree` unsubscribe |
+| 0.6 ✅ | `TrWallet`, `TrCurve`, `TrSave`, phases in the debugger tab, getting-started guide ([RFC 0003](docs/rfcs/0003-truss-0.6-economy-and-save.md)) |
+| 1.0 | Frozen API, Asset Library |
 
 ## Related
 
@@ -141,8 +150,11 @@ Truss es un framework de arquitectura para GDScript (Godot 4.5+), escrito en GDS
 
 Cada pieza es opcional y nada se ejecuta en cada frame. Ya están implementados y probados `core`, `di`,
 `messaging` (con `send_async`), los módulos con arranque ordenado, la inyección automática, la máquina de estados
-jerárquica, la pestaña del depurador del editor y las herramientas (perfil estricto, generadores y `arch_check`),
-probados en Godot 4.5.1 y 4.7.2. El juego de ejemplo `examples/arena` usa todas las piezas. La documentación está en inglés.
+jerárquica y `TrPhases`, el contenido (`TrRegistry`), las estadísticas con modificadores, la pausa con tokens,
+la economía (`TrWallet`, `TrCurve`), el guardado (`TrSave`), la pestaña del depurador del editor y las
+herramientas (perfil estricto, generadores y `arch_check`), probados en Godot 4.5.1 y 4.7.2. El juego de ejemplo
+`examples/arena` usa todas las piezas. Para empezar: [Getting started](docs/guide/getting-started.md) (15 minutos).
+La documentación está en inglés.
 
 ## License
 

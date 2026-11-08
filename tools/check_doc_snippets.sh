@@ -1,7 +1,8 @@
 #!/bin/bash
 # Compiles the code blocks of a guide that start with "# file: res://...", in a throwaway project with
 # addons/truss and the strict typing profile. Autoload blocks ("(autoload "Name")") are registered as autoloads.
-# Usage: GODOT=/path/to/godot tools/check_doc_snippets.sh docs/guide/lite.md
+# Usage: GODOT=/path/to/godot tools/check_doc_snippets.sh docs/guide/lite.md [play.gd]
+# With a play script (a SceneTree script), it is copied in as res://play.gd and run twice after the compile check.
 set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 G="${GODOT:-godot}"
@@ -45,4 +46,12 @@ EOF
 "$G" --headless --path "$P" --import > /dev/null 2>&1
 out="$(timeout 60 "$G" --headless --path "$P" -s res://check.gd 2>&1)"; code=$?
 grep -E "snippets:|FAILED|Parse Error" <<<"$out"
-exit $code
+[ $code = 0 ] || exit $code
+if [ -n "${2:-}" ]; then
+	cp "$ROOT/$2" "$P/play.gd"
+	export APPDATA="$P/.appdata" XDG_DATA_HOME="$P/.appdata"
+	for run in 1 2; do
+		timeout 60 "$G" --headless --path "$P" -s res://play.gd 2>&1 | grep -E "^PLAY|SCRIPT ERROR|Parse Error"
+	done
+fi
+exit 0

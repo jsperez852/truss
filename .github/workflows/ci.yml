@@ -54,6 +54,13 @@ jobs:
       - name: Exported build (TrRegistry in a .pck)
         run: GODOT="$GODOT" bash tools/test_export.sh
 
+      - name: Getting started guide (compiles and plays a round)
+        run: |
+          out="$(GODOT="$GODOT" bash tools/check_doc_snippets.sh docs/guide/getting-started.md tools/getting_started_play.gd.txt)"
+          echo "$out"
+          grep -q "PLAY best_before=0 .* score=30 phase=over best=30" <<<"$out"
+          grep -q "PLAY best_before=30 " <<<"$out"
+
       # The Asset Library and GitHub's "Download ZIP" use git archive: only addons/truss may be in it.
       - name: Package contains only addons/truss
         run: |
