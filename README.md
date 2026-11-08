@@ -104,6 +104,7 @@ and the standard 4.5.1 build used in CI exit cleanly. The leaked objects reporte
 | M2 ✅ | `modules`, `TrBootstrap`, automatic injector, minimal example |
 | M3 ✅ | Tooling: strict profile, `arch_check` v2, generators, Claude Code skill |
 | M4 ✅ | `fsm`, editor panel, async handlers, example game |
+| 0.5 (draft) | Content and gameplay primitives: `TrRegistry`, `TrStat`, pause tokens and app lifecycle, event priority and source, FSM arguments and intents, Truss Lite ([RFC 0002](docs/rfcs/0002-truss-0.5-gameplay-primitives.md)) |
 | 1.0 | Frozen API, complete docs, Asset Library |
 
 ## Related
