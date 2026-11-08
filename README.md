@@ -13,7 +13,10 @@ all in pure GDScript for Godot 4.5+.
 > New here? [Getting started](docs/guide/getting-started.md) builds a small game in 15 minutes. Small game? Read
 > [Truss Lite](docs/guide/lite.md). Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
 
-![examples/arena, the example game, played by its autoplay bot in CI](docs/images/arena.png)
+![The Truss tab of the editor's Debugger panel: modules and services of the running game, a log of events, requests and phase changes, and the current phase of each TrPhases](docs/images/debugger-tab.png)
+
+*The **Truss** debugger tab with messages captured from `examples/arena` (modules, services, events, requests) and a
+`TrPhases` test scene.*
 
 ## Why
 
