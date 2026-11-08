@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="FxItemDef" format=3]
+
+[ext_resource type="Script" path="res://tests/fixtures/fx_item_def.gd" id="1_s"]
+
+[resource]
+script = ExtResource("1_s")
+id = &"elixir"
+weight = 1.0
+rare = true

@@ -51,6 +51,9 @@ jobs:
       - name: Example game (autoplay, arch_check)
         run: GODOT="$GODOT" bash tools/run_arena.sh
 
+      - name: Exported build (TrRegistry in a .pck)
+        run: GODOT="$GODOT" bash tools/test_export.sh
+
       - name: Benchmarks
         if: matrix.godot == '4.7.2'
         run: godot --headless --path . -s res://tools/bench.gd | tee -a "$GITHUB_STEP_SUMMARY"

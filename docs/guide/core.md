@@ -61,5 +61,8 @@ TrContracts.describe(SaveGateway)                       # "SaveGateway" (class_n
 TrContracts.describe_value(obj)                         # "JsonSaveGateway", "int", "null", "<freed object>"
 ```
 
+`describe()` names inner classes of scripts with a `class_name` as `Outer.Inner` (for example
+`GameEvents.StaminaChanged`); inner classes of unnamed scripts fall back to `<unnamed Base subclass>`.
+
 `implements()` is safe with freed objects. In GDScript, using `is` on a freed instance is a runtime error, so
 check validity first in your own code too.

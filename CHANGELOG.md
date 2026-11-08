@@ -3,7 +3,17 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
-## [Unreleased] — 0.4.0 (milestone M4)
+## [Unreleased] — 0.5.0 (RFC 0002)
+
+### Added
+- `content`: `TrRegistry` (scan with `ResourceLoader.list_directory`, `by_id`, `where`, `pick_weighted`,
+  `instantiate` with `duplicate_deep`, `skipped`), with `tools/test_export.sh` checking an exported `.pck` in CI.
+
+### Changed
+- `TrContracts.describe()` names inner classes of named scripts `Outer.Inner` (also nested), so modules and events
+  declared as inner classes get readable names in boot messages and the debugger tab.
+
+## 0.4.0 (milestone M4)
 
 ### Added
 - `fsm`: `TrStateMachine` and `TrState`: hierarchical states as nodes, transitions by class, initial states and

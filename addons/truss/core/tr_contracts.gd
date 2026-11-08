@@ -23,9 +23,15 @@ static func require(object: Variant, contract: Script, context: String = "") -> 
 	return false
 
 
+# Inner class -> "Outer.Inner", built on first use from the global class list.
+static var _inner_names: Dictionary[Script, String] = {}
+static var _inner_names_built: bool = false
+
+
 ## A readable name for a script: its [code]class_name[/code], or its path when it has none. Inner classes
-## ([code]class Foo:[/code] inside a script) expose neither, so they are described by their first named base
-## class, for example [code]<unnamed TrModule subclass>[/code].
+## ([code]class Foo:[/code] inside a script) are named [code]Outer.Foo[/code] when the outer script has a
+## [code]class_name[/code]; otherwise they are described by their first named base class, for example
+## [code]<unnamed TrModule subclass>[/code].
 static func describe(script: Script) -> String:
 	if script == null:
 		return "<null script>"
@@ -34,6 +40,9 @@ static func describe(script: Script) -> String:
 		return String(global_name)
 	if not script.resource_path.is_empty():
 		return script.resource_path
+	var inner_name: String = _inner_name(script)
+	if not inner_name.is_empty():
+		return inner_name
 	var base: Script = script.get_base_script()
 	while base != null:
 		if base.get_global_name() != &"":
@@ -53,3 +62,42 @@ static func describe_value(value: Variant) -> String:
 	if value == null:
 		return "null"
 	return type_string(typeof(value))
+
+
+## Forgets the inner-class name cache (after scripts are reloaded, for example by a tool).
+static func clear_name_cache() -> void:
+	_inner_names.clear()
+	_inner_names_built = false
+
+
+static func _inner_name(script: Script) -> String:
+	if not _inner_names.has(script) and not _inner_names_built:
+		_build_inner_names()
+	return _inner_names.get(script, "")
+
+
+static func _build_inner_names() -> void:
+	_inner_names_built = true
+	for entry: Dictionary in ProjectSettings.get_global_class_list():
+		var path: String = entry["path"]
+		if not path.ends_with(".gd") or not ResourceLoader.exists(path):
+			continue
+		var outer: Script = load(path) as Script
+		if outer != null:
+			var outer_name: String = entry["class"]
+			_index_inner_classes(outer, outer_name, 0)
+
+
+static func _index_inner_classes(outer: Script, prefix: String, depth: int) -> void:
+	if depth > 4:
+		return
+	var constants: Dictionary = outer.get_script_constant_map()
+	for key: Variant in constants:
+		var value: Variant = constants[key]
+		if value is Script:
+			var inner: Script = value
+			# Only true inner classes have no path; preloaded scripts keep theirs and are named by it.
+			if inner.resource_path.is_empty() and not _inner_names.has(inner):
+				var full_name: String = "%s.%s" % [prefix, str(key)]
+				_inner_names[inner] = full_name
+				_index_inner_classes(inner, full_name, depth + 1)

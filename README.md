@@ -22,6 +22,7 @@ without changing the language or fighting the editor.
 | `di` | ✅ M1 | `TrServiceContainer`: singleton, scoped, transient and instance lifetimes, scopes, cycle detection, startup validation |
 | `messaging` | ✅ M1, M4 | Typed `TrEvent` bus; `TrMediator` for commands and queries with `TrBehavior` pipelines; `send_async` for handlers that `await` |
 | `modules` | ✅ M2 | `TrModule` per feature, `TrBootstrap` composition root with dependency-ordered startup, `Truss` autoload with automatic `_inject()` before `_ready()` |
+| `content` | ✅ 0.5 | `TrRegistry`: a Resource database (scan, by id, where, weighted pick, private copies) that also works in exported builds |
 | `fsm` | ✅ M4 | Hierarchical node-based `TrStateMachine` with transitions by state class, queued transitions and history |
 | `tooling` | ✅ M3, M4 | Strict typing profile, generators (module, use case, port, event), `arch_check.gd` (layers, features, forbidden classes, JUnit), and a **Truss** tab in the editor's Debugger panel |
 
@@ -68,6 +69,7 @@ if result.is_err():
 - [di](docs/guide/di.md): `TrServiceContainer`, lifetimes, scopes, validation
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
 - [modules](docs/guide/modules.md): `TrModule`, `TrBootstrap`, the `Truss` autoload and automatic injection
+- [content](docs/guide/content.md): `TrRegistry`
 - [fsm](docs/guide/fsm.md): `TrStateMachine`, `TrState`
 - [tooling](docs/guide/tooling.md): strict profile, generators, `arch_check`
 - [examples/minimal](examples/minimal): a feature through every layer, with failure modes
@@ -89,6 +91,7 @@ godot --headless --path . -s res://tools/bench.gd
 GODOT="$(command -v godot)" bash tools/run_example.sh             # example in every mode
 GODOT="$(command -v godot)" bash tools/test_tooling.sh            # strict profile, generators, arch_check
 GODOT="$(command -v godot)" bash tools/run_arena.sh               # the example game, played by a bot
+GODOT="$(command -v godot)" bash tools/test_export.sh             # TrRegistry in an exported .pck
 ```
 
 Known issue: with the **Windows .NET build of Godot 4.5.1**, the full gdUnit4 run can end with a segmentation fault
