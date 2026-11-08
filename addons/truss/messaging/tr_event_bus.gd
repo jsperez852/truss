@@ -14,7 +14,8 @@ extends RefCounted
 ## [/codeblock]
 ## Prefer local signals between nodes that share a parent. Use the bus for facts that unrelated systems care about.
 
-## Emitted after an event was delivered (used by the editor debugger tab). Costs one signal emit per publish.
+## Emitted when an event is published, before its handlers run, so nested publishes keep their real order
+## (used by the editor debugger tab). Costs one signal emit per publish.
 signal published(event: TrEvent)
 
 var _handlers: Dictionary[Script, Array] = {}
@@ -59,6 +60,7 @@ func publish(event: TrEvent) -> int:
 	if event == null:
 		push_error("TrEventBus.publish(): event is null")
 		return 0
+	published.emit(event)
 	_publishing += 1
 	var called: int = 0
 	var script: Script = event.get_script() as Script
@@ -74,7 +76,6 @@ func publish(event: TrEvent) -> int:
 					called += 1
 		script = script.get_base_script()
 	_publishing -= 1
-	published.emit(event)
 	return called
 
 

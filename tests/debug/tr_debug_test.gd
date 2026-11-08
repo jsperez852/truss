@@ -83,3 +83,12 @@ func test_bus_emits_published() -> void:
 	bus.published.connect(func(e: TrEvent) -> void: seen.append(TrContracts.describe_value(e)))
 	bus.publish(FxHit.new(1))
 	assert_array(seen).contains_exactly(["FxHit"])
+
+
+func test_published_follows_publish_order_for_nested_events() -> void:
+	var bus := TrEventBus.new()
+	var seen: Array[String] = []
+	bus.published.connect(func(e: TrEvent) -> void: seen.append(TrContracts.describe_value(e)))
+	bus.subscribe(FxHit, func(_e: FxHit) -> void: bus.publish(FxEvent.new()))
+	bus.publish(FxHit.new(1))
+	assert_array(seen).contains_exactly(["FxHit", "FxEvent"])

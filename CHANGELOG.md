@@ -12,7 +12,7 @@ and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, mino
   asynchronous handlers with the `async_handler` error.
 - Editor: a **Truss** tab in the Debugger panel (`TrDebugPanel`, `TrDebugReporter`, `tr_debugger_plugin.gd`)
   with modules, services, events and requests of the running game.
-- `TrEventBus.published` signal.
+- `TrEventBus.published` signal, emitted before the handlers run so nested events keep their order.
 - `examples/arena` game and `tools/run_arena.sh` (autoplay, record saving, `arch_check`), run in CI.
 - 114 gdUnit4 tests.
 
