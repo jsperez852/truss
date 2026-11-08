@@ -120,3 +120,9 @@ Events appear in the order they were published. A request is logged when it fini
 published appear just before it.
 The game side is `TrDebugReporter`, which the `Truss` autoload starts only when `EngineDebugger.is_active()`, so
 exported games don't send anything. It adds one behavior to the mediator and one signal connection to the bus.
+
+Games that never call `Truss.boot()` (Truss Lite) still see their activity in the tab: every `TrEventBus` sends its
+events itself (through `TrEventBus.debug_sink`), `Truss.pause` sends its changes, and every `TrPhases` its
+transitions. Only the modules, services and requests need a boot. Set `bus.debug_sink = Callable()` to keep a
+noisy bus out of the log. Events declared as inner classes of a script without `class_name` show as
+`<unnamed TrEvent subclass>`: give that script a `class_name`.

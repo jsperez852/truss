@@ -13,6 +13,7 @@ var _bus: TrEventBus
 var _mediator: TrMediator
 var _behavior: DebugBehavior
 var _pause: TrPause
+var _bus_sink: Callable
 
 
 ## Times every request and reports it. Added to the mediator's pipeline as its outermost behavior.
@@ -39,10 +40,11 @@ func attach(bootstrap: TrBootstrap, pause: TrPause = null) -> void:
 	var container: TrServiceContainer = bootstrap.get_container()
 	send(&"boot", boot_payload(bootstrap.module_names(), container))
 	if pause != null:
-		_pause = pause
-		_pause.changed.connect(_on_pause_changed)
+		watch_pause(pause)
 	if container.has(TrEventBus):
 		_bus = container.get_service(TrEventBus) as TrEventBus
+		_bus_sink = _bus.debug_sink
+		_bus.debug_sink = Callable()
 		_bus.published.connect(_on_published)
 	if container.has(TrMediator):
 		_mediator = container.get_service(TrMediator) as TrMediator
@@ -51,12 +53,23 @@ func attach(bootstrap: TrBootstrap, pause: TrPause = null) -> void:
 		_mediator.add_behavior(_behavior)
 
 
+## Reports changes of [param pause] (the [code]Truss[/code] autoload calls it at startup, before any boot).
+func watch_pause(pause: TrPause) -> void:
+	if _pause == pause:
+		return
+	if _pause != null and _pause.changed.is_connected(_on_pause_changed):
+		_pause.changed.disconnect(_on_pause_changed)
+	_pause = pause
+	_pause.changed.connect(_on_pause_changed)
+
+
 func detach() -> void:
 	if _pause != null and _pause.changed.is_connected(_on_pause_changed):
 		_pause.changed.disconnect(_on_pause_changed)
 	_pause = null
 	if _bus != null and _bus.published.is_connected(_on_published):
 		_bus.published.disconnect(_on_published)
+		_bus.debug_sink = _bus_sink
 	if _mediator != null and _behavior != null:
 		_mediator.remove_behavior(_behavior)
 	if _behavior != null:

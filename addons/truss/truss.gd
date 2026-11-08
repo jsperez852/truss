@@ -64,7 +64,8 @@ func boot(modules: Array, root_container: TrServiceContainer = null) -> TrResult
 		injector.attach(get_tree())
 		injector.inject_tree(get_tree().root)
 	if EngineDebugger.is_active():
-		_reporter = TrDebugReporter.new()
+		if _reporter == null:
+			_reporter = TrDebugReporter.new()
 		_reporter.attach(_bootstrap, pause)
 	return result
 
@@ -96,6 +97,10 @@ func automatic_injection_enabled() -> bool:
 func _enter_tree() -> void:
 	if pause == null:
 		pause = TrPause.new(get_tree())
+	# Pause changes show in the debugger tab from the start, also in games that never call boot().
+	if EngineDebugger.is_active() and _reporter == null:
+		_reporter = TrDebugReporter.new()
+		_reporter.watch_pause(pause)
 
 
 ## The value of [code]truss/lifecycle/pause_on_focus_loss[/code] (default [code]false[/code]).

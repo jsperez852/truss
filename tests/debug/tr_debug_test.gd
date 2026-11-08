@@ -109,3 +109,39 @@ func test_panel_shows_phases_without_boot() -> void:
 func test_phases_have_a_name() -> void:
 	assert_str(String(TrPhases.new().name)).is_equal("phases")
 	assert_str(String(TrPhases.new(&"game").name)).is_equal("game")
+
+
+func test_bus_reports_through_its_debug_sink() -> void:
+	var bus := TrEventBus.new()
+	assert_bool(bus.debug_sink.is_valid()).is_false()   # no debugger in tests
+	var seen: Array[String] = []
+	bus.debug_sink = func(e: TrEvent) -> void: seen.append(TrContracts.describe_value(e))
+	bus.publish(FxHit.new(1))
+	assert_array(seen).contains_exactly(["FxHit"])
+
+
+func test_reporter_takes_over_the_container_bus_and_gives_it_back() -> void:
+	var boot: TrBootstrap = _booted()
+	var bus := boot.get_container().get_service(TrEventBus) as TrEventBus
+	var own: Array[int] = [0]
+	var sink := func(_e: TrEvent) -> void: own[0] += 1
+	bus.debug_sink = sink
+	var reporter := FxRecordingReporter.new()
+	reporter.attach(boot)
+	bus.publish(FxHit.new(1))
+	assert_int(own[0]).is_equal(0)
+	assert_int(reporter.sent.size()).is_equal(2)   # boot + the event, once
+	reporter.detach()
+	bus.publish(FxHit.new(1))
+	assert_int(own[0]).is_equal(1)
+
+
+func test_reporter_watches_pause_once() -> void:
+	var reporter := FxRecordingReporter.new()
+	var pause := TrPause.new(get_tree())
+	reporter.watch_pause(pause)
+	reporter.watch_pause(pause)
+	var token := pause.acquire(&"menu")
+	token.release()
+	assert_int(reporter.sent.size()).is_equal(2)
+	reporter.detach()

@@ -1,5 +1,7 @@
 # Publishing on the Godot Asset Library
 
+Guía paso a paso en español: [asset-library.es.md](asset-library.es.md).
+
 What the submission form at https://godotengine.org/asset-library/asset/submit needs. Submitting is done by the
 repository owner, logged in on the Asset Library.
 

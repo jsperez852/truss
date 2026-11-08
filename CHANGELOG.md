@@ -3,6 +3,19 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
+## 0.6.1 — 2026-11-08
+
+### Added
+- The Truss debugger tab works without `Truss.boot()`: every `TrEventBus` reports its events itself
+  (`TrEventBus.debug_sink`, cleared by the reporter that `boot()` attaches, so nothing is logged twice) and the
+  `Truss` autoload reports `Truss.pause` changes from startup. Truss Lite games see events, pauses and phases.
+- `addons/truss/README.md` (the folder users keep), `docs/.gdignore`, and a Spanish Asset Library guide
+  ([docs/asset-library.es.md](docs/asset-library.es.md)).
+
+### Changed
+- `examples/arena` keeps its high score in a `TrSave` (with a one-time import of the old file) and runs its
+  match with a `TrPhases`.
+
 ## 0.6.0 — 2026-11-08 (RFC 0003)
 
 ### Added

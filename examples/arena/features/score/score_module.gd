@@ -9,7 +9,7 @@ func dependencies() -> Array[Script]:
 
 
 func register(c: TrServiceContainer) -> void:
-	c.singleton(HighscoreStore, func() -> HighscoreStore: return ConfigHighscoreStore.new("user://arena_highscore.cfg"))
+	c.singleton(HighscoreStore, func() -> HighscoreStore: return SaveHighscoreStore.new("user://arena.save"))
 	c.singleton(ScoreBoard, func(s: TrServiceContainer) -> ScoreBoard:
 		return ScoreBoard.new((s.get_service(HighscoreStore) as HighscoreStore).load_best()))
 

@@ -6,7 +6,7 @@
 typed events, commands and queries through a mediator, feature modules, a strict typing profile and a layer linter,
 all in pure GDScript for Godot 4.5+.
 
-> Status: **0.6.0**. Implemented and tested on Godot 4.5.1 and 4.7.2: `core`, `di`, `messaging` (with `send_async`,
+> Status: **0.6.1**. Implemented and tested on Godot 4.5.1 and 4.7.2: `core`, `di`, `messaging` (with `send_async`,
 > priorities and sources), `modules`, automatic injection, `fsm` (with arguments and intents, and `TrPhases` for
 > phases in code), `content`, `stats`, `time` (pause tokens, hit stop, lifecycle), `economy` (`TrWallet`,
 > `TrCurve`), `save` (`TrSave`), the editor debugger tab and the tooling. The API may still change before 1.0.

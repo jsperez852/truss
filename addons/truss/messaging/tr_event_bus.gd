@@ -65,6 +65,12 @@ class Subscription:
 			handler.call()
 
 
+## Called with every published event, before its handlers. While the game runs from the editor it sends the event
+## to the Truss debugger tab, so events show up without [code]Truss.boot()[/code]; the reporter that
+## [code]Truss.boot()[/code] attaches clears it to avoid reporting twice. Set it to [code]Callable()[/code] to
+## keep a bus out of the tab.
+var debug_sink: Callable = Callable(TrEventBus, &"_send_to_debugger") if EngineDebugger.is_active() else Callable()
+
 var _subscriptions: Dictionary[Script, Array] = {}
 var _dispatch_cache: Dictionary[Script, Array] = {}
 var _sequence: int = 0
@@ -167,6 +173,8 @@ func publish(event: TrEvent, source: Object = null) -> int:
 	if source != null:
 		event.source = source
 	published.emit(event)
+	if debug_sink.is_valid():
+		debug_sink.call(event)
 	var called: int = 0
 	var has_dead: bool = false
 	for sub: Subscription in _dispatch_list(event.get_script() as Script):
@@ -241,6 +249,11 @@ func _prune() -> void:
 				sub.active = false
 				list.remove_at(i)
 	_dispatch_cache.clear()
+
+
+static func _send_to_debugger(event: TrEvent) -> void:
+	if EngineDebugger.is_active():
+		EngineDebugger.send_message("truss:event", TrDebugReporter.event_payload(event))
 
 
 func _is_event_script(script: Script) -> bool:

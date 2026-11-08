@@ -73,7 +73,8 @@ func _on_score_changed(event: Events.ScoreChanged) -> void:
 	text = "Score: %d" % event.score
 ```
 
-Publishing: `Game.bus.publish(Events.ScoreChanged.new(score))`. No `_exit_tree()` unsubscribe: freed nodes
+Publishing: `Game.bus.publish(Events.ScoreChanged.new(score))`. While the game runs from the editor, the
+events, pause changes and phases show in the **Truss** tab of the Debugger panel, without any boot. No `_exit_tree()` unsubscribe: freed nodes
 are dropped and nodes outside the tree are skipped. Handlers that don't need the event can omit the argument
 (`func _on_player_died() -> void`).
 
