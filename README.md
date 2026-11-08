@@ -84,6 +84,10 @@ godot --headless --path . -s res://tools/bench.gd
 GODOT="$(command -v godot)" bash tools/run_example.sh             # example in every mode
 ```
 
+Known issue: with the **Windows .NET build of Godot 4.5.1**, the full gdUnit4 run can end with a segmentation fault
+at exit (code 139) after every test has passed and gdUnit4 reported exit code 0. Subsets of the suite, Godot 4.7.2
+and the standard 4.5.1 build used in CI exit cleanly. The leaked objects reported at exit belong to gdUnit4.
+
 ## Roadmap
 
 | Milestone | Content |
