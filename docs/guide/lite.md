@@ -7,8 +7,8 @@ matches the game. Every level keeps working when you move to the next one.
 | Level | For | Uses | Skips |
 |---|---|---|---|
 | 0. None | Pong, a one-scene jam game | Godot signals and a script per scene | All of Truss |
-| 1. Arcade | Flappy-style, small arcade games with a few screens | `TrEventBus` in one autoload, `TrResult`, `TrPhases` for the game phase, `Truss.pause` | DI, modules, mediator, plugin settings |
-| 2. Mid-size | Platformers, small roguelites, idle games | Level 1 + `TrRegistry` for content, `TrStats` for numbers, pause tokens and lifecycle events | Modules, mediator, `arch_check` |
+| 1. Arcade | Flappy-style, small arcade games with a few screens | `TrEventBus` in one autoload, `TrResult`, `TrPhases` for the game phase, `TrSave`, `Truss.pause` | DI, modules, mediator, plugin settings |
+| 2. Mid-size | Platformers, small roguelites, idle games | Level 1 + `TrRegistry` for content, `TrStats` for numbers, `TrWallet` and `TrCurve` for economies, pause tokens and lifecycle events | Modules, mediator, `arch_check` |
 | 3. Full | Games with many features or several people | Everything: modules, DI and `_inject`, mediator, `arch_check`, generators | Nothing |
 
 ## Level 0: you don't need Truss
@@ -23,24 +23,26 @@ to remove three lines. Stay at level 0 until one of these shows up:
 
 ## Level 1: arcade
 
-One autoload owns the bus; scripts publish and subscribe to typed events. Saving returns a `TrResult`.
+One autoload owns the bus; scripts publish and subscribe to typed events. `TrSave` keeps the best score.
 
 ```gdscript
 # file: res://game.gd (autoload "Game")
 extends Node
 
 var bus := TrEventBus.new()
+var save := TrSave.new("user://game.save")
 var best_score: int = 0
+
+
+func _ready() -> void:
+	best_score = save.read_or({"best": 0})["best"]
 
 
 func save_best(score: int) -> TrResult:
 	if score <= best_score:
 		return TrResult.success(false)
 	best_score = score
-	var cfg := ConfigFile.new()
-	cfg.set_value("score", "best", best_score)
-	var err: Error = cfg.save("user://best.cfg")
-	return TrResult.success(true) if err == OK else TrResult.failure(&"save_failed", error_string(err))
+	return save.write({"best": best_score})
 ```
 
 ```gdscript
@@ -115,6 +117,7 @@ extends Node
 
 var upgrades := TrRegistry.new(UpgradeDef)
 var stats := TrStats.new({&"income": 1.0, &"speed": 1.0})
+var wallet := TrWallet.new({&"coins": 100.0})
 
 
 func _ready() -> void:
@@ -123,10 +126,13 @@ func _ready() -> void:
 		push_error(scan.message)
 
 
-func buy(id: StringName) -> TrResult:
+func buy(id: StringName, level: int) -> TrResult:
 	var def := upgrades.by_id(id) as UpgradeDef
 	if def == null:
 		return TrResult.failure(&"unknown_upgrade", str(id))
+	var paid: TrResult = wallet.try_spend(def.cost.value_at(level))
+	if paid.is_err():
+		return paid
 	TrModifierDef.apply_all(def.modifiers, stats, def)
 	return TrResult.success(def)
 ```
@@ -137,12 +143,14 @@ class_name UpgradeDef
 extends Resource
 
 @export var id: StringName
-@export var cost: float = 10.0
+@export var cost: TrCurve   # price per level, tuned in the inspector
 @export var modifiers: Array[TrModifierDef] = []
 ```
 
 - `TrRegistry` loads every `.tres` in a folder and keeps working after export (where `DirAccess` doesn't).
 - `TrStats` turns forgotten keys into errors and keeps modifiers by source, so selling an upgrade is `stats.remove_from(def)`.
+- `TrWallet` pays all or nothing and returns why it failed; `TrCurve` is the price per level (×1.15 per level,
+  ×3 every 25, rounded up...) as a Resource you tune in the inspector. Save with `TrSave.write(wallet.snapshot())`.
 - Hold a pause token while a menu is open, and react to `TrAppEvents.FocusLost` to save or pause (see [time](time.md)).
 
 ## Level 3: full

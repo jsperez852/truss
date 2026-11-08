@@ -92,3 +92,20 @@ func test_published_follows_publish_order_for_nested_events() -> void:
 	bus.subscribe(FxHit, func(_e: FxHit) -> void: bus.publish(FxEvent.new()))
 	bus.publish(FxHit.new(1))
 	assert_array(seen).contains_exactly(["FxHit", "FxEvent"])
+
+
+func test_panel_shows_phases_without_boot() -> void:
+	var panel: TrDebugPanel = auto_free(TrDebugPanel.new())
+	add_child(panel)
+	panel.apply("phase", ["game", "", "ready", 1])
+	panel.apply("phase", ["game", "ready", "playing", 2])
+	panel.apply("phase", ["menu", "", "closed", 2])
+	assert_array(panel.tree_lines()).contains_exactly(["Phases/game | playing", "Phases/menu | closed"])
+	assert_array(panel.log_lines()).contains_exactly(["1  phase   game: ready", "2  phase   game: ready -> playing", "3  phase   menu: closed"])
+	panel.apply("boot", [PackedStringArray(["CoreModule"]), []])
+	assert_array(panel.tree_lines()).contains_exactly(["Modules/CoreModule | #1", "Phases/game | playing", "Phases/menu | closed"])
+
+
+func test_phases_have_a_name() -> void:
+	assert_str(String(TrPhases.new().name)).is_equal("phases")
+	assert_str(String(TrPhases.new(&"game").name)).is_equal("game")

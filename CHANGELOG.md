@@ -3,6 +3,23 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
+## 0.6.0 — 2026-11-08 (RFC 0003)
+
+### Added
+- `economy`: `TrWallet` (currencies, `try_spend` returning `TrResult`, all-or-nothing `try_spend_all`, `changed`
+  signal, `snapshot`/`restore`) and `TrCurve` (exponential, linear or table growth, rounding once or at every
+  level, milestones, `total`, `max_affordable`), a Resource tuned in the inspector.
+- `save`: `TrSave` (one Dictionary per file, atomic write with a `.bak` backup, versions and migrations, fallback
+  to the backup, `read_or` with defaults, optional encryption; never stores objects).
+- `TrPhases` reports transitions to the editor's Truss debugger tab (log and a "Phases" section), without
+  `Truss.boot()`. `TrPhases.new(name)`.
+- `TrEventBus.unsubscribe(type, handler, source)` removes one source's subscription.
+- Guides: [economy](docs/guide/economy.md), [save](docs/guide/save.md); Truss Lite uses `TrSave`, `TrWallet` and `TrCurve`.
+
+### Fixed
+- `TrEventBus.subscribe()` treated the same handler with a different `source` as a duplicate, so one shared
+  Resource listening to several characters only received the first one's events (found migrating gradma-tale).
+
 ## 0.5.1 — 2026-11-08 (pilot adjustments)
 
 Adjustments from migrating four real projects (Pong, Flappy-style, platformer, idle tycoon) to Truss.

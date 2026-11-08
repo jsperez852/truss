@@ -43,6 +43,8 @@ func _on_player_died() -> void:        # no event argument when the handler does
 ```gdscript
 bus.subscribe(EnemyKilled, _count_points, {priority = 10})    # runs before priority-0 handlers
 bus.subscribe(Damaged, _on_my_damage, {source = self})          # only events published with this source
+bus.subscribe(Damaged, shared_effect.on_damage, {source = enemy})  # the same handler once per source
+bus.unsubscribe(Damaged, shared_effect.on_damage, enemy)        # removes only that source
 bus.publish(Damaged.new(5), self)                               # source is stored in event.source
 ```
 

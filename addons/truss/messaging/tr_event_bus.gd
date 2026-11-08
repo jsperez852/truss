@@ -53,6 +53,11 @@ class Subscription:
 		var node: Node = node_ref.get_ref() as Node
 		return node != null and node.is_inside_tree()
 
+	func same_source(source: Variant) -> bool:
+		if not has_source:
+			return source == null
+		return source != null and source_ref.get_ref() == source
+
 	func deliver(event: TrEvent) -> void:
 		if pass_event:
 			handler.call(event)
@@ -70,8 +75,9 @@ var _sequence: int = 0
 ## [param options]: [code]priority[/code] (int, default 0, higher runs first), [code]source[/code] (an Object:
 ## only events published with that same source are delivered) and [code]outside_tree[/code] (bool, default
 ## [code]false[/code]: handlers bound to a Node are skipped while the node is outside the tree; [code]true[/code]
-## delivers anyway). Subscribing the same handler to the same type twice has no effect. Returns [code]false[/code]
-## if the arguments are invalid.
+## delivers anyway). Subscribing the same handler to the same type and source twice has no effect; the same
+## handler with different sources (one shared Resource listening to several characters) is several subscriptions.
+## Returns [code]false[/code] if the arguments are invalid.
 func subscribe(event_type: Script, handler: Callable, options: Dictionary = {}) -> bool:
 	if not _is_event_script(event_type):
 		push_error("TrEventBus.subscribe(): %s is not a TrEvent subclass" % TrContracts.describe(event_type))
@@ -92,8 +98,9 @@ func subscribe(event_type: Script, handler: Callable, options: Dictionary = {}) 
 		push_error("TrEventBus.subscribe(): outside_tree must be a bool, got %s" % type_string(typeof(outside_tree)))
 		return false
 	var list: Array = _subscriptions.get_or_add(event_type, [])
+	var source_key: Variant = options.get("source", null)
 	for existing: Subscription in list:
-		if existing.active and existing.handler == handler:
+		if existing.active and existing.handler == handler and existing.same_source(source_key):
 			return true
 	var sub := Subscription.new()
 	sub.handler = handler
@@ -122,15 +129,16 @@ func subscribe(event_type: Script, handler: Callable, options: Dictionary = {}) 
 	return true
 
 
-## Removes [param handler] from [param event_type]. Safe to call during [method publish]: a handler removed
-## by an earlier handler of the same event isn't called.
-func unsubscribe(event_type: Script, handler: Callable) -> void:
+## Removes [param handler] from [param event_type]: only its subscription with [param source] when given, every
+## subscription of the handler otherwise. Safe to call during [method publish]: a handler removed by an earlier
+## handler of the same event isn't called.
+func unsubscribe(event_type: Script, handler: Callable, source: Object = null) -> void:
 	if not _subscriptions.has(event_type):
 		return
 	var list: Array = _subscriptions[event_type]
 	for i: int in range(list.size() - 1, -1, -1):
 		var sub: Subscription = list[i]
-		if sub.handler == handler:
+		if sub.handler == handler and (source == null or sub.same_source(source)):
 			sub.active = false
 			list.remove_at(i)
 	_dispatch_cache.clear()

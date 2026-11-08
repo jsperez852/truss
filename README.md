@@ -6,10 +6,11 @@
 typed events, commands and queries through a mediator, feature modules, a strict typing profile and a layer linter,
 all in pure GDScript for Godot 4.5+.
 
-> Status: **0.5.1**. Implemented and tested on Godot 4.5.1 and 4.7.2: `core`, `di`, `messaging` (with `send_async`,
-> priorities and sources), `modules`, automatic injection, `fsm` (with arguments and intents, and `TrPhases` for phases in code), `content`, `stats`,
-> `time` (pause tokens, hit stop, lifecycle), the editor debugger tab and the tooling. The API may still change
-> before 1.0. Small game? Start with [Truss Lite](docs/guide/lite.md). Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
+> Status: **0.6.0**. Implemented and tested on Godot 4.5.1 and 4.7.2: `core`, `di`, `messaging` (with `send_async`,
+> priorities and sources), `modules`, automatic injection, `fsm` (with arguments and intents, and `TrPhases` for
+> phases in code), `content`, `stats`, `time` (pause tokens, hit stop, lifecycle), `economy` (`TrWallet`,
+> `TrCurve`), `save` (`TrSave`), the editor debugger tab and the tooling. The API may still change before 1.0.
+> Small game? Start with [Truss Lite](docs/guide/lite.md). Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
 
 ## Why
 
@@ -26,7 +27,9 @@ without changing the language or fighting the editor.
 | `content` | ✅ 0.5 | `TrRegistry`: a Resource database (scan, by id, where, weighted pick, private copies) that also works in exported builds |
 | `stats` | ✅ 0.5 | `TrStat` and `TrStats`: base values with flat, percent and multiply modifiers by source, cached, declared keys; `TrModifierDef` for the inspector |
 | `time` | ✅ 0.5 | `Truss.pause`: pause tokens that never unpause under another holder, stacking hit stop; `TrAppEvents` for focus, mobile pause/resume and quit, with optional pause on focus loss |
-| `fsm` | ✅ M4 | Hierarchical node-based `TrStateMachine` with transitions by state class, queued transitions and history; transition arguments and intents (0.5); `TrPhases` for game phases in code (0.5.1) |
+| `economy` | ✅ 0.6 | `TrWallet`: currencies with all-or-nothing spending that returns why it failed; `TrCurve`: values per level (exponential, linear, table, milestones, rounding per level) as inspector Resources |
+| `save` | ✅ 0.6 | `TrSave`: one Dictionary per file, atomic writes with a backup, versions and migrations, optional encryption |
+| `fsm` | ✅ M4 | Hierarchical node-based `TrStateMachine` with transitions by state class, queued transitions and history; transition arguments and intents (0.5); `TrPhases` for game phases in code (0.5.1), shown in the debugger tab (0.6) |
 | `tooling` | ✅ M3, M4 | Strict typing profile, generators (module, use case, port, event), `arch_check.gd` (layers, features, forbidden classes, JUnit), and a **Truss** tab in the editor's Debugger panel |
 
 Every piece is optional. Nothing runs per frame unless you call it.
@@ -72,11 +75,13 @@ if result.is_err():
 - [di](docs/guide/di.md): `TrServiceContainer`, lifetimes, scopes, validation
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
 - [modules](docs/guide/modules.md): `TrModule`, `TrBootstrap`, the `Truss` autoload and automatic injection
-- [Truss Lite](docs/guide/lite.md): three adoption levels, from a single autoload to the full framework
+- [Truss Lite](docs/guide/lite.md): adoption levels, from a single autoload to the full framework
 - [content](docs/guide/content.md): `TrRegistry`
 - [stats](docs/guide/stats.md): `TrStat`, `TrModifier`, `TrStats`, `TrModifierDef`
 - [time](docs/guide/time.md): pause tokens, hit stop, app lifecycle events
-- [fsm](docs/guide/fsm.md): `TrStateMachine`, `TrState`
+- [economy](docs/guide/economy.md): `TrWallet`, `TrCurve`
+- [save](docs/guide/save.md): `TrSave`
+- [fsm](docs/guide/fsm.md): `TrPhases`, `TrStateMachine`, `TrState`
 - [tooling](docs/guide/tooling.md): strict profile, generators, `arch_check`
 - [examples/minimal](examples/minimal): a feature through every layer, with failure modes
 - [examples/arena](examples/arena): a small game (enemy types from a registry, waves with a state machine, player

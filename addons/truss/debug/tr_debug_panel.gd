@@ -11,6 +11,7 @@ var _tree: Tree
 var _log: ItemList
 var _clear: Button
 var _log_count: int = 0
+var _phases: Dictionary[String, String] = {}
 
 
 func _init() -> void:
@@ -51,6 +52,8 @@ func apply(message: String, data: Array) -> bool:
 			_add_log("event   %s" % str(data[0]) if data.size() > 0 else "event")
 		"request":
 			_add_log(_request_line(data))
+		"phase":
+			_show_phase(data)
 		"pause":
 			var paused: bool = data[0] if data.size() > 0 else false
 			var holders: PackedStringArray = data[1] if data.size() > 1 else PackedStringArray()
@@ -108,7 +111,37 @@ func _show_boot(data: Array) -> void:
 		item.set_text(0, str(pair[0]))
 		item.set_text(1, str(pair[1]))
 	_summary.text = "%d modules, %d services" % [modules.size(), services.size()]
+	_rebuild_phases(root)
 	clear_log()
+
+
+func _show_phase(data: Array) -> void:
+	if data.size() < 3:
+		return
+	var machine: String = str(data[0])
+	var previous: String = str(data[1])
+	_phases[machine] = str(data[2])
+	_add_log("phase   %s: %s%s" % [machine, (previous + " -> ") if not previous.is_empty() else "", _phases[machine]])
+	var root: TreeItem = _tree.get_root()
+	if root == null:
+		root = _tree.create_item()
+		_summary.text = "Truss running (no boot)"
+	_rebuild_phases(root)
+
+
+## The "Phases" section: the current phase of every TrPhases that reported a transition.
+func _rebuild_phases(root: TreeItem) -> void:
+	for section: TreeItem in root.get_children():
+		if section.get_text(0) == "Phases":
+			section.free()
+	if _phases.is_empty():
+		return
+	var phase_section: TreeItem = _tree.create_item(root)
+	phase_section.set_text(0, "Phases")
+	for machine: String in _phases:
+		var item: TreeItem = _tree.create_item(phase_section)
+		item.set_text(0, machine)
+		item.set_text(1, _phases[machine])
 
 
 func _request_line(data: Array) -> String:

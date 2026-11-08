@@ -4,7 +4,7 @@ extends RefCounted
 ## Ready → Playing → Over). Phases are names with optional [code]enter[/code], [code]exit[/code] and
 ## [code]update[/code] callables, all on the script that owns the machine.
 ## [codeblock]
-## var phase := TrPhases.new()
+## var phase := TrPhases.new(&"game")      # the name shows in the editor's Truss debugger tab
 ##
 ## func _ready() -> void:
 ##     phase.add(&"ready")
@@ -30,6 +30,9 @@ signal changed(previous: StringName, current: StringName)
 
 const OPTION_KEYS: PackedStringArray = ["enter", "exit", "update", "to"]
 
+## Shown in the Truss debugger tab (each transition is reported while the game runs from the editor).
+var name: StringName
+
 
 class Phase:
 	extends RefCounted
@@ -44,6 +47,10 @@ var _current: StringName = &""
 var _elapsed: float = 0.0
 var _busy: bool = false
 var _queued: Array[StringName] = []
+
+
+func _init(p_name: StringName = &"phases") -> void:
+	name = p_name
 
 
 ## Declares [param phase_name]. [param options]: [code]enter[/code], [code]exit[/code], [code]update[/code]
@@ -98,6 +105,7 @@ func start(phase_name: StringName) -> bool:
 	_elapsed = 0.0
 	_call(_phases[phase_name].enter, &"")
 	_busy = false
+	_report(&"", phase_name)
 	changed.emit(&"", phase_name)
 	_drain()
 	return true
@@ -126,6 +134,7 @@ func go(phase_name: StringName) -> bool:
 	_elapsed = 0.0
 	_call(_phases[phase_name].enter, previous)
 	_busy = false
+	_report(previous, phase_name)
 	changed.emit(previous, phase_name)
 	_drain()
 	return true
@@ -182,6 +191,11 @@ func _call(callable: Callable, other: StringName) -> void:
 		callable.call()
 	else:
 		callable.call(other)
+
+
+func _report(previous: StringName, next: StringName) -> void:
+	if EngineDebugger.is_active():
+		EngineDebugger.send_message("truss:phase", [String(name), String(previous), String(next), Engine.get_process_frames()])
 
 
 func _drain() -> void:

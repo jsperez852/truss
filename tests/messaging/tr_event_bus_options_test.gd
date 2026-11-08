@@ -85,3 +85,32 @@ func test_dictionary_string_and_stringname_keys_are_the_same() -> void:
 	var lua_style := {hitstun = 0.3}
 	assert_bool(lua_style.has("hitstun")).is_true()
 	assert_bool(lua_style.has(&"hitstun")).is_true()
+
+
+func test_same_handler_with_different_sources_is_several_subscriptions() -> void:
+	var a := Node.new()
+	var b := Node.new()
+	var shared := FxListener.new()
+	bus.subscribe(FxHit, shared.on_hit, {source = a})
+	bus.subscribe(FxHit, shared.on_hit, {source = b})
+	bus.subscribe(FxHit, shared.on_hit, {source = b})
+	assert_int(bus.subscriber_count(FxHit)).is_equal(2)
+	assert_int(bus.publish(FxHit.new(1), b)).is_equal(1)
+	assert_int(bus.publish(FxHit.new(1), a)).is_equal(1)
+	a.free()
+	b.free()
+
+
+func test_unsubscribe_one_source() -> void:
+	var a := Node.new()
+	var b := Node.new()
+	var shared := FxListener.new()
+	bus.subscribe(FxHit, shared.on_hit, {source = a})
+	bus.subscribe(FxHit, shared.on_hit, {source = b})
+	bus.unsubscribe(FxHit, shared.on_hit, a)
+	assert_int(bus.publish(FxHit.new(1), a)).is_equal(0)
+	assert_int(bus.publish(FxHit.new(1), b)).is_equal(1)
+	bus.unsubscribe(FxHit, shared.on_hit)
+	assert_int(bus.subscriber_count(FxHit)).is_equal(0)
+	a.free()
+	b.free()

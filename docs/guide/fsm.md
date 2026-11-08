@@ -6,7 +6,7 @@ AI where every state is a node with its own exports, substates, input and physic
 ## TrPhases: phases in code
 
 ```gdscript
-var phase := TrPhases.new()
+var phase := TrPhases.new(&"game")     # the name shows in the editor's Truss debugger tab
 
 func _ready() -> void:
 	phase.add(&"ready")
@@ -25,6 +25,8 @@ func _on_player_crashed() -> void:
   `go()` inside `enter`/`exit` runs after the current transition.
 - `current()`, `is_in()`, `is_in_any()`, `can_go()`, `elapsed()` (seconds in the phase, counted by `update`) and
   the `changed(previous, current)` signal.
+- While the game runs from the editor, every transition shows in the **Truss** debugger tab (log and a
+  "Phases" section with the current phase of each machine), even without `Truss.boot()`.
 - Move to `TrStateMachine` when a phase needs its own exported values, substates or input handling.
 
 ## TrStateMachine
