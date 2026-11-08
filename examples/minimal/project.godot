@@ -1,0 +1,17 @@
+; Minimal Truss example. Run tools/run_example.sh from the repository root (it copies addons/truss here).
+config_version=5
+
+[application]
+
+config/name="Truss minimal example"
+run/main_scene="res://features/score/presentation/score_label.tscn"
+config/features=PackedStringArray("4.5")
+
+[autoload]
+
+Truss="*res://addons/truss/truss.gd"
+App="*res://app/app.gd"
+
+[truss]
+
+injection/automatic=true

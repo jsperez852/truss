@@ -23,14 +23,23 @@ static func require(object: Variant, contract: Script, context: String = "") -> 
 	return false
 
 
-## A readable name for a script: its [code]class_name[/code], or its path when it has none.
+## A readable name for a script: its [code]class_name[/code], or its path when it has none. Inner classes
+## ([code]class Foo:[/code] inside a script) expose neither, so they are described by their first named base
+## class, for example [code]<unnamed TrModule subclass>[/code].
 static func describe(script: Script) -> String:
 	if script == null:
 		return "<null script>"
 	var global_name: StringName = script.get_global_name()
 	if global_name != &"":
 		return String(global_name)
-	return script.resource_path if not script.resource_path.is_empty() else "<anonymous script>"
+	if not script.resource_path.is_empty():
+		return script.resource_path
+	var base: Script = script.get_base_script()
+	while base != null:
+		if base.get_global_name() != &"":
+			return "<unnamed %s subclass>" % base.get_global_name()
+		base = base.get_base_script()
+	return "<anonymous script>"
 
 
 ## A readable description of any value, used in error messages.

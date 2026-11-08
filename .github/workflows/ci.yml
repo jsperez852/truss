@@ -42,6 +42,9 @@ jobs:
           chmod +x addons/gdUnit4/runtest.sh
           GODOT_BIN="$GODOT" addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
 
+      - name: Example (normal run and failure modes)
+        run: GODOT="$GODOT" bash tools/run_example.sh
+
       - name: Benchmarks
         if: matrix.godot == '4.7.2'
         run: godot --headless --path . -s res://tools/bench.gd | tee -a "$GITHUB_STEP_SUMMARY"

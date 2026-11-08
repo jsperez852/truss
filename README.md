@@ -6,9 +6,9 @@
 typed events, commands and queries through a mediator, feature modules, a strict typing profile and a layer linter,
 all in pure GDScript for Godot 4.5+.
 
-> Status: **0.1.0-dev (milestone M1)**. `core`, `di` and `messaging` are implemented and tested on Godot 4.5.1 and
-> 4.7.2. `modules`, the automatic injector, `fsm` and the tooling come in later milestones, and the API may still
-> change before 1.0. Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
+> Status: **0.2.0-dev (milestone M2)**. `core`, `di`, `messaging`, `modules` and automatic injection are
+> implemented and tested on Godot 4.5.1 and 4.7.2. `fsm` and the tooling come in later milestones, and the API may
+> still change before 1.0. Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
 
 ## Why
 
@@ -21,7 +21,7 @@ without changing the language or fighting the editor.
 | `core` | ✅ M1 | `TrResult` for expected errors, `TrOption`, `TrContracts` on top of native `@abstract` ports |
 | `di` | ✅ M1 | `TrServiceContainer`: singleton, scoped, transient and instance lifetimes, scopes, cycle detection, startup validation |
 | `messaging` | ✅ M1 | Typed `TrEvent` bus; `TrMediator` for commands and queries with `TrBehavior` pipelines |
-| `modules` | M2 | `TrModule` per feature, `TrBootstrap` composition root with dependency-ordered startup, automatic `_inject()` |
+| `modules` | ✅ M2 | `TrModule` per feature, `TrBootstrap` composition root with dependency-ordered startup, `Truss` autoload with automatic `_inject()` before `_ready()` |
 | `fsm` | M4 | Hierarchical node-based state machine |
 | `tooling` | M3 | Strict typing profile, `arch_check.gd` layer linter for CI, generators, editor panel |
 
@@ -30,8 +30,11 @@ Every piece is optional. Nothing runs per frame unless you call it.
 ## Install
 
 1. Copy `addons/truss/` into your project's `addons/` folder (from a release zip or this repository).
-2. That's it for M1: the classes are global (`class_name`), no plugin needs enabling yet.
-3. Requires Godot **4.5 or newer** (for `@abstract`).
+2. Enable **Truss** in Project → Project Settings → Plugins. That adds the `Truss` autoload and the
+   `truss/injection/automatic` setting. The classes (`TrResult`, `TrServiceContainer`...) work without the plugin.
+3. Add your composition root as an autoload **below** `Truss` and call `Truss.boot([...])` from its `_ready()`
+   ([modules guide](docs/guide/modules.md)).
+4. Requires Godot **4.5 or newer** (for `@abstract`).
 
 ## Quick look
 
@@ -64,6 +67,8 @@ if result.is_err():
 - [core](docs/guide/core.md): `TrResult`, `TrOption`, `TrContracts`
 - [di](docs/guide/di.md): `TrServiceContainer`, lifetimes, scopes, validation
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
+- [modules](docs/guide/modules.md): `TrModule`, `TrBootstrap`, the `Truss` autoload and automatic injection
+- [examples/minimal](examples/minimal): a feature through every layer, with failure modes
 - [benchmarks](docs/benchmarks.md): cost compared to native signals and direct calls
 - [RFC 0001](docs/rfcs/0001-truss-architecture.md): design, decisions and roadmap
 - [CHANGELOG](CHANGELOG.md)
@@ -76,6 +81,7 @@ godot --headless --path . --import
 godot --headless --path . -s res://tools/compile_check.gd      # strict typing applies to addons/truss on 4.7+
 GODOT_BIN="$(command -v godot)" addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
 godot --headless --path . -s res://tools/bench.gd
+GODOT="$(command -v godot)" bash tools/run_example.sh             # example in every mode
 ```
 
 ## Roadmap
@@ -84,7 +90,7 @@ godot --headless --path . -s res://tools/bench.gd
 |---|---|
 | M0 ✅ | Design accepted (RFC 0001), name, license, repository |
 | M1 ✅ | `core`, `di`, synchronous `messaging`, benchmarks |
-| M2 | `modules`, `TrBootstrap`, automatic injector, minimal example |
+| M2 ✅ | `modules`, `TrBootstrap`, automatic injector, minimal example |
 | M3 | Tooling: strict profile, `arch_check` v2, generators, Claude Code skill |
 | M4 | `fsm`, editor panel, async handlers, example game |
 | 1.0 | Frozen API, complete docs, Asset Library |
@@ -105,8 +111,9 @@ Truss es un framework de arquitectura para GDScript (Godot 4.5+), escrito en GDS
 - módulos por feature con arranque ordenado;
 - un perfil de tipado estricto y un linter de capas para CI.
 
-Cada pieza es opcional y nada se ejecuta en cada frame. Ya están implementados y probados `core`, `di` y
-`messaging` (hito M1, en Godot 4.5.1 y 4.7.2); el resto llega en los siguientes hitos. La documentación está en inglés.
+Cada pieza es opcional y nada se ejecuta en cada frame. Ya están implementados y probados `core`, `di`,
+`messaging`, los módulos con arranque ordenado y la inyección automática (hitos M1 y M2, en Godot 4.5.1 y 4.7.2).
+`fsm` y las herramientas llegan en los siguientes hitos. La documentación está en inglés.
 
 ## License
 

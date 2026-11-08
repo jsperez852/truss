@@ -3,7 +3,23 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
-## [Unreleased] — 0.1.0 (milestone M1)
+## [Unreleased] — 0.2.0 (milestone M2)
+
+### Added
+- `modules`: `TrModule` (`dependencies`, `register`, `start`, `stop`, `module_name`) and `TrBootstrap`
+  (dependency ordering, missing-dependency, cycle and duplicate detection, container validation before any
+  `start`, `shutdown` in reverse order).
+- `TrInjector`: calls `_inject(c)` before `_ready()` through `SceneTree.node_added`, once per node; explicit
+  `inject` / `inject_tree`; switchable container for scopes.
+- `Truss` autoload and editor plugin (`plugin.cfg`), with the `truss/injection/automatic` project setting.
+- `examples/minimal` with `tools/run_example.sh`, which checks the normal run and three failure modes.
+- 90 gdUnit4 tests.
+
+### Changed
+- `TrContracts.describe()` names unnamed scripts (inner classes) by their first named base class.
+- `TrBootstrap.add_all()` and `Truss.boot()` accept any `Array` of modules, so array literals work from dynamic calls.
+
+## 0.1.0 (milestone M1)
 
 ### Added
 - `core`: `TrResult` (success/failure, `unwrap`, `unwrap_or`, `map`, `and_then`), `TrOption`, `TrContracts`

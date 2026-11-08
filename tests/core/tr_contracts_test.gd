@@ -42,6 +42,10 @@ func test_describe() -> void:
 	anonymous.source_code = "extends RefCounted\n"
 	anonymous.reload()
 	assert_str(TrContracts.describe(anonymous)).is_equal("<anonymous script>")
+	var inner := GDScript.new()
+	inner.source_code = "extends FxMemoryStore\n"
+	inner.reload()
+	assert_str(TrContracts.describe(inner)).is_equal("<unnamed FxMemoryStore subclass>")
 
 
 func test_describe_value() -> void:

@@ -66,3 +66,8 @@ level_scope.dispose()
 `validate()` resolves every registration once, collects every problem (missing registrations, cycles, wrong
 types) without printing errors, and returns one `TrResult`. Singletons stay created. Scoped and transient services
 are created in a temporary scope that is disposed. Call it once at startup and fail fast.
+
+## Injecting nodes
+
+`TrInjector` calls `_inject(c: TrServiceContainer)` on nodes before their `_ready()`. With the Truss plugin
+enabled, `Truss.boot()` sets it up automatically; see the [modules guide](modules.md#the-truss-autoload-and-automatic-injection).
