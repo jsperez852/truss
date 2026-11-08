@@ -117,4 +117,31 @@ grep -q "features/shop/application/buy.gd" <<<"$out" && { ok=0; echo "  unexpect
 [ -f "$P/reports/arch.xml" ] && grep -q 'failures="2"' "$P/reports/arch.xml" && grep -q "forbidden in this layer" "$P/reports/arch.xml" \
 	&& pass "arch_check writes a JUnit report" || bad "JUnit report" "$(cat "$P/reports/arch.xml" 2>/dev/null)"
 
+# --- stateful_resources rule ---------------------------------------------------
+cat > "$P/features/inventory/domain/item_def.gd" <<'EOF2'
+class_name ItemDef
+extends Resource
+@export var id: StringName
+@export_storage var stored_level: int = 0
+var uses: int = 0
+var _cooldown: float = 0.0
+static var counter: int = 0
+const MAX: int = 3
+EOF2
+cat > "$P/features/inventory/domain/weapon_def.gd" <<'EOF2'
+class_name WeaponDef
+extends ItemDef
+@export var damage: int = 1
+EOF2
+run --import > /dev/null
+out="$(tool arch_check.gd)"; code=$?
+grep -q "item_def.gd" <<<"$out" && { echo "FAIL stateful_resources should be off by default"; fail=1; } || echo "PASS stateful_resources is off by default"
+sed -i 's/^stateful_resources=\[\]/stateful_resources=["domain"]/' "$P/architecture.cfg"
+out="$(tool arch_check.gd)"; code=$?
+if grep -qF "item_def.gd [domain] Resource keeps runtime state in non-exported fields (uses, _cooldown)" <<<"$out" && ! grep -q "weapon_def.gd" <<<"$out"; then
+	echo "PASS stateful_resources reports only fields declared in the script, not exported/stored/static/const ones"
+else
+	echo "FAIL stateful_resources"; echo "$out" | grep -E "VIOLATION|arch_check"; fail=1
+fi
+
 exit $fail

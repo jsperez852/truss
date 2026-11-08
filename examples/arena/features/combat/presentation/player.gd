@@ -5,6 +5,7 @@ extends CharacterBody2D
 const CENTER: Vector2 = Vector2(480, 270)
 
 var _config: CombatConfig
+var _stats: PlayerStats
 var _options: GameOptions
 var _cooldown: float = 0.0
 var _time: float = 0.0
@@ -12,6 +13,7 @@ var _time: float = 0.0
 
 func _inject(c: TrServiceContainer) -> void:
 	_config = c.get_service(CombatConfig) as CombatConfig
+	_stats = c.get_service(PlayerStats) as PlayerStats
 	_options = c.get_service(GameOptions) as GameOptions
 
 
@@ -23,14 +25,14 @@ func _physics_process(delta: float) -> void:
 	if _options.autoplay:
 		var waypoint: Vector2 = CENTER + Vector2(cos(_time), sin(_time)) * 140.0
 		direction = global_position.direction_to(waypoint)
-	velocity = direction * _config.player_speed
+	velocity = direction * _stats.value(&"speed")
 	move_and_slide()
 	_cooldown -= delta
 	if _cooldown <= 0.0:
 		var target: ArenaEnemy = _nearest_enemy()
 		if target != null:
 			_fire(global_position.direction_to(target.global_position))
-			_cooldown = _config.fire_interval
+			_cooldown = _stats.value(&"fire_interval")
 	queue_redraw()
 
 

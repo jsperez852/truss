@@ -3,7 +3,7 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
-## [Unreleased] — 0.5.0 (RFC 0002)
+## 0.5.0 — 2026-11-08 (RFC 0002)
 
 ### Added
 - `content`: `TrRegistry` (scan with `ResourceLoader.list_directory`, `by_id`, `where`, `pick_weighted`,
@@ -19,6 +19,11 @@ and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, mino
   hierarchy, source filtering, `TrEvent.source`, cached dispatch order.
 - `TrStateMachine.transition_to(state, args)` with `transition_args`, and `send_intent(intent, data)` with
   `TrState.handle_intent()` bubbling from the leaf.
+- `arch_check` rule `stateful_resources` (off by default): Resource scripts with non-exported fields.
+- `Truss.boot()` registers `Truss.pause` in the container as `TrPause`.
+- Truss Lite guide (three adoption levels) and `tools/check_doc_snippets.sh`, run in CI.
+- `examples/arena` uses `TrRegistry` (enemy types), `TrStats` (player upgrades per wave), hit stop, a pause token
+  and event priority.
 
 ### Changed
 - `TrContracts.describe()` names inner classes of named scripts `Outer.Inner` (also nested), so modules and events

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EnemyType" format=3]
+
+[ext_resource type="Script" path="res://features/combat/domain/enemy_type.gd" id="1_et"]
+
+[resource]
+script = ExtResource("1_et")
+id = &"grunt"
+health = 2
+speed = 80.0
+color = Color(1, 0.3, 0.3, 1)
+weight = 3.0

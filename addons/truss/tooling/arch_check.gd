@@ -32,6 +32,9 @@ composition=["*"]
 [rules]
 no_nodes=["domain", "application"]
 no_scene_access=["domain", "application"]
+; layers where Resource scripts may only hold @export / @export_storage fields (shared definitions).
+; Off by default; for example: stateful_resources=["domain"]
+stateful_resources=[]
 
 [features]
 ; files under root/<feature>/ belong to that feature. Other features may only use these layers of it.
@@ -114,6 +117,7 @@ func _load_config(path: String) -> bool:
 	_ignore = _strings(cfg.get_value("settings", "ignore", ["res://addons/*", "res://test/*", "res://tests/*"]))
 	var no_nodes: PackedStringArray = _strings(cfg.get_value("rules", "no_nodes", []))
 	var no_scene: PackedStringArray = _strings(cfg.get_value("rules", "no_scene_access", []))
+	var stateful: PackedStringArray = _strings(cfg.get_value("rules", "stateful_resources", []))
 	for layer_name: String in cfg.get_section_keys("layers"):
 		_layers.append({
 			"name": layer_name,
@@ -121,6 +125,7 @@ func _load_config(path: String) -> bool:
 			"allow": _strings(cfg.get_value("allow", layer_name, [])),
 			"no_nodes": no_nodes.has(layer_name),
 			"no_scene_access": no_scene.has(layer_name),
+			"stateful_resources": stateful.has(layer_name),
 		})
 	var root: String = str(cfg.get_value("features", "root", ""))
 	_feature_root = root if root.is_empty() or root.ends_with("/") else root + "/"
@@ -184,6 +189,7 @@ func _check_file(path: String) -> void:
 	var layer_name: String = layer["name"]
 	var no_scene_access: bool = layer["no_scene_access"]
 	var no_nodes: bool = layer["no_nodes"]
+	var check_resource_state: bool = layer["stateful_resources"]
 	var source: String = FileAccess.get_file_as_string(path)
 	var code: String = _strip(source, false)
 	var bare: String = _strip(source, true)
@@ -224,6 +230,32 @@ func _check_file(path: String) -> void:
 			var base: StringName = script.get_instance_base_type()
 			if ClassDB.is_parent_class(base, &"Node"):
 				_report(path, layer_name, "extends a Node type (%s)" % base)
+	# 5. Resource scripts holding runtime state
+	if check_resource_state:
+		var res_script: Script = load(path)
+		if res_script != null and ClassDB.is_parent_class(res_script.get_instance_base_type(), &"Resource"):
+			var fields: PackedStringArray = _runtime_fields(res_script)
+			if not fields.is_empty():
+				_report(path, layer_name, "Resource keeps runtime state in non-exported fields (%s); keep definitions read-only and copy them with duplicate_deep() or TrRegistry.instantiate()" % ", ".join(fields))
+
+
+## Script variables declared in [param script] itself (not inherited) that are neither exported nor stored.
+func _runtime_fields(script: Script) -> PackedStringArray:
+	var inherited := PackedStringArray()
+	var base: Script = script.get_base_script()
+	if base != null:
+		for prop: Dictionary in base.get_script_property_list():
+			var inherited_name: String = prop["name"]
+			inherited.append(inherited_name)
+	var out := PackedStringArray()
+	for prop: Dictionary in script.get_script_property_list():
+		var usage: int = prop["usage"]
+		var prop_name: String = prop["name"]
+		if usage & PROPERTY_USAGE_SCRIPT_VARIABLE == 0 or inherited.has(prop_name):
+			continue
+		if usage & (PROPERTY_USAGE_STORAGE | PROPERTY_USAGE_EDITOR) == 0:
+			out.append(prop_name)
+	return out
 
 
 func _check_dependency(path: String, layer: Dictionary, target: String, label: String) -> void:

@@ -11,7 +11,7 @@ fail=0
 
 out="$(timeout 120 "$G" --headless --path "$EX" --fixed-fps 60 -- --autoplay 2>&1)"; code=$?
 ok=1
-for p in "wave 1 cleared" "wave 2 cleared" "wave 3 cleared" "GAME OVER waves=3 score=180"; do
+for p in "wave 1 enemies:" "wave 1 cleared" "wave 2 cleared" "wave 3 cleared" "GAME OVER waves=3 score=180"; do
 	grep -qF -- "$p" <<<"$out" || { ok=0; echo "  missing: $p"; }
 done
 if grep -qE "SCRIPT ERROR|Parse Error|^ERROR" <<<"$out"; then ok=0; echo "  errors in output:"; grep -E "SCRIPT ERROR|Parse Error|^ERROR" <<<"$out" | head -10; fi

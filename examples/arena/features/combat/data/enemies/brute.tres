@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EnemyType" format=3]
+
+[ext_resource type="Script" path="res://features/combat/domain/enemy_type.gd" id="1_et"]
+
+[resource]
+script = ExtResource("1_et")
+id = &"brute"
+health = 4
+speed = 55.0
+color = Color(0.7, 0.35, 1, 1)
+weight = 1.0

@@ -8,11 +8,15 @@ const CENTER: Vector2 = Vector2(480, 270)
 
 var _mediator: TrMediator
 var _bus: TrEventBus
+var _types: EnemyTypes
+var _rng := RandomNumberGenerator.new()
+var _waves_started: int = 0
 
 
 func _inject(c: TrServiceContainer) -> void:
 	_mediator = c.get_service(TrMediator) as TrMediator
 	_bus = c.get_service(TrEventBus) as TrEventBus
+	_types = c.get_service(EnemyTypes) as EnemyTypes
 
 
 func _ready() -> void:
@@ -39,8 +43,14 @@ func _start_next_wave() -> void:
 		print("no wave started: ", result.message)
 		return
 	var count: int = result.value
+	_waves_started += 1
+	_rng.seed = 1000 + _waves_started  # same enemy mix every run
+	var mix: Dictionary[StringName, int] = {}
 	for i: int in count:
 		var enemy := ENEMY_SCENE.instantiate() as ArenaEnemy
+		enemy.type = _types.pick_weighted(_rng, func(t: EnemyType) -> float: return t.weight) as EnemyType
+		mix[enemy.type.id] = mix.get(enemy.type.id, 0) + 1
 		enemy.target = player
 		enemy.position = CENTER + Vector2.RIGHT.rotated(TAU * float(i) / float(count)) * 380.0
 		get_parent().add_child(enemy)
+	print("wave %d enemies: %s" % [_waves_started, mix])

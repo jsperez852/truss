@@ -10,7 +10,8 @@ func enter(_previous: TrState) -> void:
 	enemy.remove_from_group(&"enemies")
 	enemy.velocity = Vector2.ZERO
 	($"../../Shape" as CollisionShape2D).set_deferred(&"disabled", true)
-	enemy.bus.publish(EnemyKilled.new(enemy.config.points_per_enemy, enemy.global_position))
+	enemy.bus.publish(EnemyKilled.new(enemy.points(), enemy.global_position), enemy)
+	enemy.pause.hit_stop(0.03, 0.2)
 
 
 func update(delta: float) -> void:

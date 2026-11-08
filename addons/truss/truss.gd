@@ -41,12 +41,19 @@ var _bootstrap: TrBootstrap
 var _reporter: TrDebugReporter
 
 
-## Boots [param modules] (an [Array] of [TrModule]) with a new [TrBootstrap]. On success, starts automatic injection (unless disabled)
-## and injects nodes already in the tree. Returns the bootstrap's [TrResult].
+## Boots [param modules] (an [Array] of [TrModule]) with a new [TrBootstrap]. [member pause] is registered in the
+## container as [TrPause]. On success, starts automatic injection (unless disabled) and injects nodes already in
+## the tree. Returns the bootstrap's [TrResult].
 func boot(modules: Array, root_container: TrServiceContainer = null) -> TrResult:
 	if _bootstrap != null and _bootstrap.is_booted():
 		return TrResult.failure(TrBootstrap.ERR_ALREADY_BOOTED, "Truss.boot() was already called")
-	_bootstrap = TrBootstrap.new(root_container)
+	# Truss.pause is registered as a TrPause instance so nodes and services can receive it through injection.
+	var root: TrServiceContainer = root_container if root_container != null else TrServiceContainer.new()
+	if pause == null:
+		pause = TrPause.new(get_tree())
+	if not root.has(TrPause):
+		root.instance(TrPause, pause)
+	_bootstrap = TrBootstrap.new(root)
 	_bootstrap.add_all(modules)
 	var result: TrResult = _bootstrap.boot()
 	if result.is_err():

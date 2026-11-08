@@ -54,6 +54,11 @@ jobs:
       - name: Exported build (TrRegistry in a .pck)
         run: GODOT="$GODOT" bash tools/test_export.sh
 
+      - name: Guide snippets compile (strict)
+        run: |
+          command -v gawk || sudo apt-get install -y gawk
+          GODOT="$GODOT" bash tools/check_doc_snippets.sh docs/guide/lite.md
+
       - name: Benchmarks
         if: matrix.godot == '4.7.2'
         run: godot --headless --path . -s res://tools/bench.gd | tee -a "$GITHUB_STEP_SUMMARY"

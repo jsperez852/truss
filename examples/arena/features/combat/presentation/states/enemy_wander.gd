@@ -16,7 +16,7 @@ func enter(_previous: TrState) -> void:
 
 func physics_update(delta: float) -> void:
 	var enemy := owner as ArenaEnemy
-	enemy.velocity = _direction * enemy.config.enemy_speed * 0.5
+	enemy.velocity = _direction * enemy.speed() * 0.5
 	enemy.move_and_slide()
 	_time_left -= delta
 	var close: bool = enemy.target != null and enemy.global_position.distance_to(enemy.target.global_position) < enemy.config.chase_distance

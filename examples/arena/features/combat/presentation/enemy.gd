@@ -3,9 +3,12 @@ extends CharacterBody2D
 ## An enemy driven by a TrStateMachine: Alive (Wander, Chase) and Dead.
 
 var target: Node2D
+## Set by the spawner before the enemy enters the tree.
+var type: EnemyType
 var health: Health
 var config: CombatConfig
 var bus: TrEventBus
+var pause: TrPause
 var flash: float = 0.0
 
 @onready var machine: TrStateMachine = $StateMachine
@@ -14,7 +17,16 @@ var flash: float = 0.0
 func _inject(c: TrServiceContainer) -> void:
 	config = c.get_service(CombatConfig) as CombatConfig
 	bus = c.get_service(TrEventBus) as TrEventBus
-	health = Health.new(config.enemy_health)
+	pause = c.get_service(TrPause) as TrPause
+	health = Health.new(type.health if type != null else config.enemy_health)
+
+
+func speed() -> float:
+	return type.speed if type != null else config.enemy_speed
+
+
+func points() -> int:
+	return type.points if type != null else config.points_per_enemy
 
 
 func _ready() -> void:
@@ -39,7 +51,8 @@ func _process(_delta: float) -> void:
 
 
 func _draw() -> void:
-	var color := Color(1.0, 0.3, 0.3) if flash <= 0.0 else Color.WHITE
+	var base_color: Color = type.color if type != null else Color(1.0, 0.3, 0.3)
+	var color: Color = base_color if flash <= 0.0 else Color.WHITE
 	if not is_alive():
 		color = Color(0.4, 0.4, 0.4)
 	draw_circle(Vector2.ZERO, 10.0, color)

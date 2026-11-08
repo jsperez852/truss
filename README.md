@@ -6,9 +6,10 @@
 typed events, commands and queries through a mediator, feature modules, a strict typing profile and a layer linter,
 all in pure GDScript for Godot 4.5+.
 
-> Status: **0.4.0-dev (milestone M4)**. Every piece in the RFC is implemented and tested on Godot 4.5.1 and 4.7.2:
-> `core`, `di`, `messaging` (with `send_async`), `modules`, automatic injection, `fsm`, the editor debugger tab and
-> the tooling. The API may still change before 1.0. Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
+> Status: **0.5.0**. Implemented and tested on Godot 4.5.1 and 4.7.2: `core`, `di`, `messaging` (with `send_async`,
+> priorities and sources), `modules`, automatic injection, `fsm` (with arguments and intents), `content`, `stats`,
+> `time` (pause tokens, hit stop, lifecycle), the editor debugger tab and the tooling. The API may still change
+> before 1.0. Small game? Start with [Truss Lite](docs/guide/lite.md). Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
 
 ## Why
 
@@ -71,14 +72,16 @@ if result.is_err():
 - [di](docs/guide/di.md): `TrServiceContainer`, lifetimes, scopes, validation
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
 - [modules](docs/guide/modules.md): `TrModule`, `TrBootstrap`, the `Truss` autoload and automatic injection
+- [Truss Lite](docs/guide/lite.md): three adoption levels, from a single autoload to the full framework
 - [content](docs/guide/content.md): `TrRegistry`
 - [stats](docs/guide/stats.md): `TrStat`, `TrModifier`, `TrStats`, `TrModifierDef`
 - [time](docs/guide/time.md): pause tokens, hit stop, app lifecycle events
 - [fsm](docs/guide/fsm.md): `TrStateMachine`, `TrState`
 - [tooling](docs/guide/tooling.md): strict profile, generators, `arch_check`
 - [examples/minimal](examples/minimal): a feature through every layer, with failure modes
-- [examples/arena](examples/arena): a small game (enemy waves with a state machine, score, async high-score save) that
-  passes `arch_check` and the strict profile; `-- --autoplay` lets a bot play it
+- [examples/arena](examples/arena): a small game (enemy types from a registry, waves with a state machine, player
+  stats that improve each wave, hit stop, a pause menu with a token, async high-score save) that passes `arch_check`
+  and the strict profile; `-- --autoplay` lets a bot play it
 - Claude Code: install the `godot-truss` plugin from [godot-market-place](https://github.com/jsperez852/godot-market-place) so Claude knows Truss's API and tools
 - [benchmarks](docs/benchmarks.md): cost compared to native signals and direct calls
 - [RFC 0001](docs/rfcs/0001-truss-architecture.md): design, decisions and roadmap
@@ -96,6 +99,7 @@ GODOT="$(command -v godot)" bash tools/run_example.sh             # example in e
 GODOT="$(command -v godot)" bash tools/test_tooling.sh            # strict profile, generators, arch_check
 GODOT="$(command -v godot)" bash tools/run_arena.sh               # the example game, played by a bot
 GODOT="$(command -v godot)" bash tools/test_export.sh             # TrRegistry in an exported .pck
+GODOT="$(command -v godot)" bash tools/check_doc_snippets.sh docs/guide/lite.md   # guide code compiles (needs gawk)
 ```
 
 Known issue: with the **Windows .NET build of Godot 4.5.1**, the full gdUnit4 run can end with a segmentation fault
@@ -111,7 +115,7 @@ and the standard 4.5.1 build used in CI exit cleanly. The leaked objects reporte
 | M2 ✅ | `modules`, `TrBootstrap`, automatic injector, minimal example |
 | M3 ✅ | Tooling: strict profile, `arch_check` v2, generators, Claude Code skill |
 | M4 ✅ | `fsm`, editor panel, async handlers, example game |
-| 0.5 (draft) | Content and gameplay primitives: `TrRegistry`, `TrStat`, pause tokens and app lifecycle, event priority and source, FSM arguments and intents, Truss Lite ([RFC 0002](docs/rfcs/0002-truss-0.5-gameplay-primitives.md)) |
+| 0.5 ✅ | Content and gameplay primitives: `TrRegistry`, `TrStat`, pause tokens and app lifecycle, event priority and source, FSM arguments and intents, Truss Lite ([RFC 0002](docs/rfcs/0002-truss-0.5-gameplay-primitives.md)) |
 | 1.0 | Frozen API, complete docs, Asset Library |
 
 ## Related

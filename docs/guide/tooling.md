@@ -69,6 +69,7 @@ generators' layout:
 | `[allow]` | domain → nothing; application → domain; infrastructure and presentation → application, domain; composition → anything |
 | `[rules]` | domain and application may not extend `Node` or touch the scene tree, autoloads or scenes |
 | `[features]` | `root="res://features/"`; other features may only use a feature's `domain` and `application` |
+| `[rules] stateful_resources` | Off by default. Layers listed here may not contain `Resource` scripts with fields that are neither `@export` nor `@export_storage` (runtime state on a shared definition). Only fields declared in the script itself are reported; `static` and `const` are ignored |
 | `[forbid]` | domain may not reference `TrServiceContainer`, `TrInjector`, `TrBootstrap`, `TrMediator`; application may not reference `TrInjector`, `TrBootstrap` |
 
 Example output:

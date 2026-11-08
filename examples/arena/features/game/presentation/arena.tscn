@@ -4,6 +4,7 @@
 [ext_resource type="Script" path="res://features/combat/presentation/player.gd" id="2_plyr"]
 [ext_resource type="Script" path="res://features/combat/presentation/spawner.gd" id="3_spwn"]
 [ext_resource type="Script" path="res://features/score/presentation/hud.gd" id="4_hud0"]
+[ext_resource type="Script" path="res://features/game/presentation/pause_overlay.gd" id="5_paus"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_pl001"]
 radius = 12.0
@@ -32,3 +33,14 @@ offset_right = 400.0
 offset_bottom = 40.0
 text = "Wave 0 | Score 0"
 script = ExtResource("4_hud0")
+
+[node name="PauseOverlay" type="CanvasLayer" parent="."]
+layer = 10
+script = ExtResource("5_paus")
+
+[node name="Label" type="Label" parent="PauseOverlay"]
+offset_left = 400.0
+offset_top = 250.0
+offset_right = 560.0
+offset_bottom = 290.0
+text = "PAUSED (Esc)"

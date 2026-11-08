@@ -61,3 +61,9 @@ func test_shutdown_disposes_container() -> void:
 	truss.call(&"shutdown")
 	assert_bool(container.is_disposed()).is_true()
 	assert_bool(truss.call(&"is_booted")).is_false()
+
+
+func test_boot_registers_the_pause_service() -> void:
+	truss.call(&"boot", [FxSaveModule.new([])])
+	var container := truss.get(&"container") as TrServiceContainer
+	assert_object(container.get_service(TrPause)).is_same(truss.get(&"pause"))
