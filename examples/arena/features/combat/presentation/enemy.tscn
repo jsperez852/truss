@@ -1,0 +1,37 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://features/combat/presentation/enemy.gd" id="1_enmy"]
+[ext_resource type="Script" path="res://addons/truss/fsm/tr_state_machine.gd" id="2_fsm0"]
+[ext_resource type="Script" path="res://features/combat/presentation/states/enemy_alive.gd" id="3_alve"]
+[ext_resource type="Script" path="res://features/combat/presentation/states/enemy_wander.gd" id="4_wndr"]
+[ext_resource type="Script" path="res://features/combat/presentation/states/enemy_chase.gd" id="5_chse"]
+[ext_resource type="Script" path="res://features/combat/presentation/states/enemy_dead.gd" id="6_dead"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_en001"]
+radius = 10.0
+
+[node name="Enemy" type="CharacterBody2D"]
+collision_layer = 2
+collision_mask = 0
+motion_mode = 1
+script = ExtResource("1_enmy")
+
+[node name="Shape" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_en001")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("initial_state")]
+script = ExtResource("2_fsm0")
+initial_state = NodePath("Alive")
+
+[node name="Alive" type="Node" parent="StateMachine" node_paths=PackedStringArray("initial_substate")]
+script = ExtResource("3_alve")
+initial_substate = NodePath("Wander")
+
+[node name="Wander" type="Node" parent="StateMachine/Alive"]
+script = ExtResource("4_wndr")
+
+[node name="Chase" type="Node" parent="StateMachine/Alive"]
+script = ExtResource("5_chse")
+
+[node name="Dead" type="Node" parent="StateMachine"]
+script = ExtResource("6_dead")

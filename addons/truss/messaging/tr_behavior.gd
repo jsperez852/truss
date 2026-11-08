@@ -15,3 +15,11 @@ extends RefCounted
 
 
 @abstract func process(request: TrRequest, next: Callable) -> TrResult
+
+
+## The asynchronous version of [method process], used by [method TrMediator.send_async]. [param next] must be
+## awaited: [code]var result: TrResult = await next.call()[/code]. The default passes straight through, so
+## behaviors that only override [method process] are skipped by [method TrMediator.send_async].
+func process_async(_request: TrRequest, next: Callable) -> TrResult:
+	var result: TrResult = await next.call()
+	return result

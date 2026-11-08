@@ -3,7 +3,20 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
-## [Unreleased] — 0.3.0 (milestone M3)
+## [Unreleased] — 0.4.0 (milestone M4)
+
+### Added
+- `fsm`: `TrStateMachine` and `TrState`: hierarchical states as nodes, transitions by class, initial states and
+  substates, queued transitions, parent-first updates, input bubbling, `history`, `transitioned` signal.
+- `TrMediator.send_async()` and `TrBehavior.process_async()` for handlers that `await`. `send()` reports
+  asynchronous handlers with the `async_handler` error.
+- Editor: a **Truss** tab in the Debugger panel (`TrDebugPanel`, `TrDebugReporter`, `tr_debugger_plugin.gd`)
+  with modules, services, events and requests of the running game.
+- `TrEventBus.published` signal.
+- `examples/arena` game and `tools/run_arena.sh` (autoplay, record saving, `arch_check`), run in CI.
+- 114 gdUnit4 tests.
+
+## 0.3.0 (milestone M3)
 
 ### Added
 - `tooling/strict_profile.gd`: dry run or `--apply` of the strict typing profile, `--level=warn`, `--include-addons`

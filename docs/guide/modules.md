@@ -110,3 +110,11 @@ PASS cycle (exit 1)
 PASS missing-module (exit 1)
 PASS missing-registration (exit 1)
 ```
+
+## The Truss debugger tab
+
+With the plugin enabled, the editor's **Debugger** panel gets a **Truss** tab while the game runs from the editor.
+It shows the booted modules and every container registration with its lifetime, and logs the last 200 events
+published on the container's `TrEventBus` and requests sent through its `TrMediator` (result, error and time in µs).
+The game side is `TrDebugReporter`, which the `Truss` autoload starts only when `EngineDebugger.is_active()`, so
+exported games don't send anything. It adds one behavior to the mediator and one signal connection to the bus.

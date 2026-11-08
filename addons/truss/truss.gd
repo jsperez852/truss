@@ -24,6 +24,7 @@ var container: TrServiceContainer
 ## The injector, created by [method boot].
 var injector: TrInjector
 var _bootstrap: TrBootstrap
+var _reporter: TrDebugReporter
 
 
 ## Boots [param modules] (an [Array] of [TrModule]) with a new [TrBootstrap]. On success, starts automatic injection (unless disabled)
@@ -41,6 +42,9 @@ func boot(modules: Array, root_container: TrServiceContainer = null) -> TrResult
 	if automatic_injection_enabled():
 		injector.attach(get_tree())
 		injector.inject_tree(get_tree().root)
+	if EngineDebugger.is_active():
+		_reporter = TrDebugReporter.new()
+		_reporter.attach(_bootstrap)
 	return result
 
 
@@ -48,6 +52,9 @@ func boot(modules: Array, root_container: TrServiceContainer = null) -> TrResult
 func shutdown() -> void:
 	if injector != null:
 		injector.detach()
+	if _reporter != null:
+		_reporter.detach()
+		_reporter = null
 	if _bootstrap != null and _bootstrap.is_booted():
 		_bootstrap.shutdown()
 	_bootstrap = null

@@ -79,7 +79,8 @@ var result: TrResult = mediator.send(AddItemRequest.new(potion, 1))
 - `register()` rejects a second handler for the same request class and handlers whose `handles()` isn't a `TrRequest`.
 - `send()` with no handler, or a handler that returns `null`, reports an error and returns a failure
   (`no_handler`, `invalid_result`).
-- Handlers are synchronous in this version. `send_async` for handlers that `await` is planned for M4.
+- A handler that uses `await` must be sent with `send_async` (below). `send()` detects it and returns an
+  `async_handler` failure instead of a half-finished result.
 
 ## TrBehavior: the pipeline
 
@@ -98,6 +99,35 @@ func process(request: TrRequest, next: Callable) -> TrResult:
 
 Return without calling `next` to stop the pipeline (validation, permissions, a paused game). Behaviors are the
 place for undo history, replays and analytics, without touching the handlers.
+
+## Asynchronous handlers: send_async
+
+Handlers that wait (file or network I/O, a timer, an animation) use `await` and are sent with `send_async`, which
+must itself be awaited:
+
+```gdscript
+class_name SaveHighscoreHandler
+extends TrRequestHandler
+
+func handles() -> Script:
+	return SaveHighscore
+
+func handle(_request: TrRequest) -> TrResult:
+	if not _board.is_record():
+		return TrResult.success(false)
+	var err: Error = await _store.save_best(_board.best)   # the adapter awaits slow storage
+	return TrResult.success(true) if err == OK else TrResult.failure(&"save_failed", error_string(err))
+```
+
+```gdscript
+var result: TrResult = await mediator.send_async(SaveHighscore.new())
+```
+
+- `send_async` also works with synchronous handlers.
+- Behaviors take part through `process_async(request, next)`, which must `await next.call()`. Its default passes
+  straight through, so a behavior that only overrides `process` is skipped by `send_async`.
+- GDScript rejects calling a coroutine without `await` when it can see the call (a parse error), but not through a
+  base-class reference or a `Callable`. That's why `send()` checks the handler's return value.
 
 ## Cost
 

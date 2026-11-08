@@ -23,5 +23,6 @@ extends RefCounted
 @abstract func handles() -> Script
 
 
-## Processes [param request] and returns its outcome.
+## Processes [param request] and returns its outcome. Handlers that [code]await[/code] (file I/O, network,
+## timers, animations) must be called with [method TrMediator.send_async].
 @abstract func handle(request: TrRequest) -> TrResult

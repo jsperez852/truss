@@ -14,6 +14,9 @@ extends RefCounted
 ## [/codeblock]
 ## Prefer local signals between nodes that share a parent. Use the bus for facts that unrelated systems care about.
 
+## Emitted after an event was delivered (used by the editor debugger tab). Costs one signal emit per publish.
+signal published(event: TrEvent)
+
 var _handlers: Dictionary[Script, Array] = {}
 var _publishing: int = 0
 
@@ -71,6 +74,7 @@ func publish(event: TrEvent) -> int:
 					called += 1
 		script = script.get_base_script()
 	_publishing -= 1
+	published.emit(event)
 	return called
 
 
