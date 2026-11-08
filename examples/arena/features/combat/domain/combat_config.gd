@@ -9,4 +9,6 @@ var bullet_damage: int = 1
 var enemy_health: int = 2
 var enemy_speed: float = 80.0
 var chase_distance: float = 320.0
+## Wandering enemies start chasing after this many seconds even if the player is far.
+var max_wander_time: float = 1.5
 var points_per_enemy: int = 10

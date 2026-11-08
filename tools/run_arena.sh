@@ -17,9 +17,16 @@ done
 if grep -qE "SCRIPT ERROR|Parse Error|^ERROR" <<<"$out"; then ok=0; echo "  errors in output:"; grep -E "SCRIPT ERROR|Parse Error|^ERROR" <<<"$out" | head -10; fi
 if [ $code = 0 ] && [ $ok = 1 ]; then echo "PASS arena autoplay ($(grep -o 'GAME OVER.*' <<<"$out"))"; else echo "FAIL arena autoplay (exit $code)"; echo "$out" | tail -20; fail=1; fi
 
-# A second run must find the record from the first and not save again.
-out="$(timeout 120 "$G" --headless --path "$EX" --fixed-fps 60 -- --autoplay 2>&1)"; code=$?
-if [ $code = 0 ] && grep -qF "record_saved=false" <<<"$out"; then echo "PASS second run keeps the saved record"; else echo "FAIL second run (exit $code)"; echo "$out" | tail -10; fail=1; fi
+# More runs must find the record from the first one and not save again. Enemy directions depend on instance
+# ids, so every run is a little different: several runs catch waves that can't be finished.
+for run in 2 3 4; do
+	out="$(timeout 120 "$G" --headless --path "$EX" --fixed-fps 60 -- --autoplay 2>&1)"; code=$?
+	if [ $code = 0 ] && grep -qF "GAME OVER waves=3 score=180 record_saved=false" <<<"$out"; then
+		echo "PASS run $run finishes and keeps the saved record"
+	else
+		echo "FAIL run $run (exit $code)"; echo "$out" | tail -10; fail=1
+	fi
+done
 
 [ -f "$EX/architecture.cfg" ] || "$G" --headless --path "$EX" -s res://addons/truss/tooling/arch_check.gd -- --write-default-config > /dev/null 2>&1
 out="$(timeout 60 "$G" --headless --path "$EX" -s res://addons/truss/tooling/arch_check.gd 2>&1)"; code=$?
