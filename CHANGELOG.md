@@ -3,7 +3,19 @@
 All notable changes to Truss are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, minor versions may break the API.
 
-## [Unreleased] — 0.2.0 (milestone M2)
+## [Unreleased] — 0.3.0 (milestone M3)
+
+### Added
+- `tooling/strict_profile.gd`: dry run or `--apply` of the strict typing profile, `--level=warn`, `--include-addons`
+  using `directory_rules` (4.7+) or `exclude_addons` (4.5).
+- `tooling/generate.gd`: `module`, `usecase`, `port` and `event` generators that never overwrite and produce
+  strict-clean code.
+- `tooling/arch_check.gd` (v2 of the marketplace checker): feature boundaries, forbidden classes per layer, JUnit
+  output, `--write-default-config`, exit code 2 for configuration errors.
+- `tools/test_tooling.sh`, run in CI on Godot 4.5.1 and 4.7.2.
+- The `godot-truss` plugin in godot-market-place.
+
+## 0.2.0 (milestone M2)
 
 ### Added
 - `modules`: `TrModule` (`dependencies`, `register`, `start`, `stop`, `module_name`) and `TrBootstrap`

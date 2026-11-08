@@ -6,9 +6,9 @@
 typed events, commands and queries through a mediator, feature modules, a strict typing profile and a layer linter,
 all in pure GDScript for Godot 4.5+.
 
-> Status: **0.2.0-dev (milestone M2)**. `core`, `di`, `messaging`, `modules` and automatic injection are
-> implemented and tested on Godot 4.5.1 and 4.7.2. `fsm` and the tooling come in later milestones, and the API may
-> still change before 1.0. Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
+> Status: **0.3.0-dev (milestone M3)**. `core`, `di`, `messaging`, `modules`, automatic injection and the tooling
+> (strict profile, generators, `arch_check`) are implemented and tested on Godot 4.5.1 and 4.7.2. `fsm` and the
+> editor panel come in M4, and the API may still change before 1.0. Design: [RFC 0001](docs/rfcs/0001-truss-architecture.md).
 
 ## Why
 
@@ -23,7 +23,7 @@ without changing the language or fighting the editor.
 | `messaging` | ✅ M1 | Typed `TrEvent` bus; `TrMediator` for commands and queries with `TrBehavior` pipelines |
 | `modules` | ✅ M2 | `TrModule` per feature, `TrBootstrap` composition root with dependency-ordered startup, `Truss` autoload with automatic `_inject()` before `_ready()` |
 | `fsm` | M4 | Hierarchical node-based state machine |
-| `tooling` | M3 | Strict typing profile, `arch_check.gd` layer linter for CI, generators, editor panel |
+| `tooling` | ✅ M3 | Strict typing profile, generators (module, use case, port, event), `arch_check.gd` (layers, features, forbidden classes, JUnit). Editor panel in M4 |
 
 Every piece is optional. Nothing runs per frame unless you call it.
 
@@ -68,7 +68,9 @@ if result.is_err():
 - [di](docs/guide/di.md): `TrServiceContainer`, lifetimes, scopes, validation
 - [messaging](docs/guide/messaging.md): `TrEventBus`, `TrMediator`, `TrBehavior`
 - [modules](docs/guide/modules.md): `TrModule`, `TrBootstrap`, the `Truss` autoload and automatic injection
+- [tooling](docs/guide/tooling.md): strict profile, generators, `arch_check`
 - [examples/minimal](examples/minimal): a feature through every layer, with failure modes
+- Claude Code: install the `godot-truss` plugin from [godot-market-place](https://github.com/jsperez852/godot-market-place) so Claude knows Truss's API and tools
 - [benchmarks](docs/benchmarks.md): cost compared to native signals and direct calls
 - [RFC 0001](docs/rfcs/0001-truss-architecture.md): design, decisions and roadmap
 - [CHANGELOG](CHANGELOG.md)
@@ -82,6 +84,7 @@ godot --headless --path . -s res://tools/compile_check.gd      # strict typing a
 GODOT_BIN="$(command -v godot)" addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
 godot --headless --path . -s res://tools/bench.gd
 GODOT="$(command -v godot)" bash tools/run_example.sh             # example in every mode
+GODOT="$(command -v godot)" bash tools/test_tooling.sh            # strict profile, generators, arch_check
 ```
 
 Known issue: with the **Windows .NET build of Godot 4.5.1**, the full gdUnit4 run can end with a segmentation fault
@@ -95,7 +98,7 @@ and the standard 4.5.1 build used in CI exit cleanly. The leaked objects reporte
 | M0 ✅ | Design accepted (RFC 0001), name, license, repository |
 | M1 ✅ | `core`, `di`, synchronous `messaging`, benchmarks |
 | M2 ✅ | `modules`, `TrBootstrap`, automatic injector, minimal example |
-| M3 | Tooling: strict profile, `arch_check` v2, generators, Claude Code skill |
+| M3 ✅ | Tooling: strict profile, `arch_check` v2, generators, Claude Code skill |
 | M4 | `fsm`, editor panel, async handlers, example game |
 | 1.0 | Frozen API, complete docs, Asset Library |
 
@@ -116,8 +119,8 @@ Truss es un framework de arquitectura para GDScript (Godot 4.5+), escrito en GDS
 - un perfil de tipado estricto y un linter de capas para CI.
 
 Cada pieza es opcional y nada se ejecuta en cada frame. Ya están implementados y probados `core`, `di`,
-`messaging`, los módulos con arranque ordenado y la inyección automática (hitos M1 y M2, en Godot 4.5.1 y 4.7.2).
-`fsm` y las herramientas llegan en los siguientes hitos. La documentación está en inglés.
+`messaging`, los módulos con arranque ordenado, la inyección automática y las herramientas (perfil estricto,
+generadores y `arch_check`) (hitos M1 a M3, en Godot 4.5.1 y 4.7.2). `fsm` y el panel del editor llegan en el M4. La documentación está en inglés.
 
 ## License
 

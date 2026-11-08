@@ -45,6 +45,9 @@ jobs:
       - name: Example (normal run and failure modes)
         run: GODOT="$GODOT" bash tools/run_example.sh
 
+      - name: Tooling (strict profile, generators, arch_check)
+        run: GODOT="$GODOT" bash tools/test_tooling.sh
+
       - name: Benchmarks
         if: matrix.godot == '4.7.2'
         run: godot --headless --path . -s res://tools/bench.gd | tee -a "$GITHUB_STEP_SUMMARY"

@@ -86,7 +86,7 @@ prefer a batteries-included layered toolkit should look at GF.
 
 ## 6. Design
 
-API sketches below were the proposals made in M0. The implemented API (M1: `core`, `di`, `messaging`; M2: `modules`, injector) is documented in
+API sketches below were the proposals made in M0. The implemented API (M1: `core`, `di`, `messaging`; M2: `modules`, injector; M3: tooling) is documented in
 [docs/guide](../guide/) and may differ in details; for example, factories receive the resolving container as an argument
 because capturing the container in a lambda creates a reference cycle.
 
@@ -218,7 +218,7 @@ A node-based hierarchical state machine with a transition history visible in the
 | M0 | This RFC accepted, name and license decided, repository created | Decisions in section 11 closed ✅ |
 | M1 ✅ | `core` + `di` + synchronous `messaging` + benchmarks | Tests green on 4.5 and 4.7, performance table |
 | M2 ✅ | `modules` + `TrBootstrap` + injector + minimal example | The example boots, and fails clearly on a cycle or a missing registration |
-| M3 | `tooling`: strict profile, `arch_check` v2, generators, marketplace skill | Example CI runs `arch_check` |
+| M3 ✅ | `tooling`: strict profile, `arch_check` v2, generators, marketplace skill | Example CI runs `arch_check` |
 | M4 | `fsm` + editor panel + `send_async` | Complete example game |
 | 1.0 | Frozen API, complete docs, Asset Library | API and docs review |
 
