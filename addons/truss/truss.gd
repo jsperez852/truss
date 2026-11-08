@@ -16,13 +16,27 @@ extends Node
 ## [/codeblock]
 ## Project setting [code]truss/injection/automatic[/code] (default [code]true[/code]) controls whether the
 ## injector listens to the scene tree. When it's off, call [code]Truss.injector.inject(node)[/code] yourself.
+## [br][br]
+## [member pause] works without booting. Lifecycle notifications (focus, app pause/resume, close request)
+## become [TrAppEvents] events: emitted as [signal app_event] and published on the container's [TrEventBus].
+## Setting [code]truss/lifecycle/pause_on_focus_loss[/code] (default [code]false[/code], recommended on mobile)
+## holds a pause token while the app is unfocused or paused by the OS.
+
+## Emitted for every application lifecycle event, booted or not.
+signal app_event(event: TrAppEvents.AppEvent)
 
 const SETTING_AUTOMATIC_INJECTION: String = "truss/injection/automatic"
+const SETTING_PAUSE_ON_FOCUS_LOSS: String = "truss/lifecycle/pause_on_focus_loss"
 
 ## The application (root) container. Valid after [method boot] succeeded.
 var container: TrServiceContainer
 ## The injector, created by [method boot].
 var injector: TrInjector
+## Pause tokens and hit stop (see [TrPause]).
+var pause: TrPause
+var _focus_token: TrPauseToken
+var _app_unfocused: bool = false
+var _app_paused: bool = false
 var _bootstrap: TrBootstrap
 var _reporter: TrDebugReporter
 
@@ -44,7 +58,7 @@ func boot(modules: Array, root_container: TrServiceContainer = null) -> TrResult
 		injector.inject_tree(get_tree().root)
 	if EngineDebugger.is_active():
 		_reporter = TrDebugReporter.new()
-		_reporter.attach(_bootstrap)
+		_reporter.attach(_bootstrap, pause)
 	return result
 
 
@@ -72,6 +86,51 @@ func automatic_injection_enabled() -> bool:
 	return enabled
 
 
+func _enter_tree() -> void:
+	if pause == null:
+		pause = TrPause.new(get_tree())
+
+
+## The value of [code]truss/lifecycle/pause_on_focus_loss[/code] (default [code]false[/code]).
+func pause_on_focus_loss_enabled() -> bool:
+	var enabled: bool = ProjectSettings.get_setting(SETTING_PAUSE_ON_FOCUS_LOSS, false)
+	return enabled
+
+
+## Turns a lifecycle notification into a [TrAppEvents] event. Called by [method _notification]; public so
+## tests and tools can simulate the OS.
+func handle_lifecycle(what: int) -> TrAppEvents.AppEvent:
+	var event: TrAppEvents.AppEvent = TrAppEvents.from_notification(what)
+	if event == null:
+		return null
+	match what:
+		NOTIFICATION_APPLICATION_FOCUS_OUT:
+			_app_unfocused = true
+		NOTIFICATION_APPLICATION_FOCUS_IN:
+			_app_unfocused = false
+		NOTIFICATION_APPLICATION_PAUSED:
+			_app_paused = true
+		NOTIFICATION_APPLICATION_RESUMED:
+			_app_paused = false
+	_update_focus_pause()
+	app_event.emit(event)
+	if container != null and not container.is_disposed() and container.has(TrEventBus):
+		(container.get_service(TrEventBus) as TrEventBus).publish(event)
+	return event
+
+
+func _update_focus_pause() -> void:
+	var away: bool = _app_unfocused or _app_paused
+	if away and pause_on_focus_loss_enabled() and _focus_token == null and pause != null:
+		_focus_token = pause.acquire(&"focus_lost")
+	elif not away and _focus_token != null:
+		_focus_token.release()
+		_focus_token = null
+
+
 func _notification(what: int) -> void:
-	if what == NOTIFICATION_PREDELETE and is_booted():
-		shutdown()
+	if what == NOTIFICATION_PREDELETE:
+		if is_booted():
+			shutdown()
+		return
+	handle_lifecycle(what)

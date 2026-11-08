@@ -11,6 +11,10 @@ and the project uses [Semantic Versioning](https://semver.org/). Until 1.0, mino
 - `stats`: `TrStat` (cached `(base + flat) × (1 + Σ percent) × Π multiply` with limits, `changed` only on real
   changes, weakly referenced object sources), `TrModifier`, `TrStats` (declared keys, errors listing valid names,
   `remove_from` across stats, `snapshot`) and `TrModifierDef` for inspector-authored modifiers.
+- `time`: `TrPause` / `TrPauseToken` as `Truss.pause` (tokens, restore of the previous pause state, tokens
+  released when freed, stacking `hit_stop` relative to the game's time scale, `reset`), `TrAppEvents` published on
+  the bus and emitted as `Truss.app_event`, setting `truss/lifecycle/pause_on_focus_loss`, and pause changes in
+  the debugger tab.
 
 ### Changed
 - `TrContracts.describe()` names inner classes of named scripts `Outer.Inner` (also nested), so modules and events

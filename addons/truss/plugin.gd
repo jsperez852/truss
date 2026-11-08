@@ -6,6 +6,7 @@ extends EditorPlugin
 const AUTOLOAD_NAME: String = "Truss"
 const AUTOLOAD_PATH: String = "res://addons/truss/truss.gd"
 const SETTING_AUTOMATIC_INJECTION: String = "truss/injection/automatic"
+const SETTING_PAUSE_ON_FOCUS_LOSS: String = "truss/lifecycle/pause_on_focus_loss"
 const DEBUGGER_PLUGIN: GDScript = preload("res://addons/truss/debug/tr_debugger_plugin.gd")
 
 var _debugger: EditorDebuggerPlugin
@@ -32,6 +33,11 @@ func _enable_plugin() -> void:
 		"type": TYPE_BOOL,
 	})
 	ProjectSettings.set_as_basic(SETTING_AUTOMATIC_INJECTION, true)
+	if not ProjectSettings.has_setting(SETTING_PAUSE_ON_FOCUS_LOSS):
+		ProjectSettings.set_setting(SETTING_PAUSE_ON_FOCUS_LOSS, false)
+	ProjectSettings.set_initial_value(SETTING_PAUSE_ON_FOCUS_LOSS, false)
+	ProjectSettings.add_property_info({"name": SETTING_PAUSE_ON_FOCUS_LOSS, "type": TYPE_BOOL})
+	ProjectSettings.set_as_basic(SETTING_PAUSE_ON_FOCUS_LOSS, true)
 	ProjectSettings.save()
 
 

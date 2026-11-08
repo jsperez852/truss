@@ -12,6 +12,7 @@ const LIFETIME_NAMES: PackedStringArray = ["singleton", "scoped", "transient", "
 var _bus: TrEventBus
 var _mediator: TrMediator
 var _behavior: DebugBehavior
+var _pause: TrPause
 
 
 ## Times every request and reports it. Added to the mediator's pipeline as its outermost behavior.
@@ -32,10 +33,14 @@ class DebugBehavior:
 		return result
 
 
-## Reports [param bootstrap]'s modules and container, and starts reporting events and requests.
-func attach(bootstrap: TrBootstrap) -> void:
+## Reports [param bootstrap]'s modules and container, and starts reporting events, requests and (when
+## [param pause] is given) pause changes.
+func attach(bootstrap: TrBootstrap, pause: TrPause = null) -> void:
 	var container: TrServiceContainer = bootstrap.get_container()
 	send(&"boot", boot_payload(bootstrap.module_names(), container))
+	if pause != null:
+		_pause = pause
+		_pause.changed.connect(_on_pause_changed)
 	if container.has(TrEventBus):
 		_bus = container.get_service(TrEventBus) as TrEventBus
 		_bus.published.connect(_on_published)
@@ -47,6 +52,9 @@ func attach(bootstrap: TrBootstrap) -> void:
 
 
 func detach() -> void:
+	if _pause != null and _pause.changed.is_connected(_on_pause_changed):
+		_pause.changed.disconnect(_on_pause_changed)
+	_pause = null
 	if _bus != null and _bus.published.is_connected(_on_published):
 		_bus.published.disconnect(_on_published)
 	if _mediator != null and _behavior != null:
@@ -83,6 +91,15 @@ static func request_payload(request: TrRequest, result: TrResult, usec: int, is_
 	var ok: bool = result != null and result.ok
 	var error: String = String(result.error) if result != null else "null_result"
 	return [TrContracts.describe_value(request), ok, error, usec, is_async]
+
+
+## [code][paused, holders][/code]
+static func pause_payload(pause: TrPause) -> Array:
+	return [pause.is_paused(), PackedStringArray(pause.holders())]
+
+
+func _on_pause_changed(_paused: bool) -> void:
+	send(&"pause", pause_payload(_pause))
 
 
 func _on_published(event: TrEvent) -> void:

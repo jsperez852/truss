@@ -51,6 +51,10 @@ func apply(message: String, data: Array) -> bool:
 			_add_log("event   %s" % str(data[0]) if data.size() > 0 else "event")
 		"request":
 			_add_log(_request_line(data))
+		"pause":
+			var paused: bool = data[0] if data.size() > 0 else false
+			var holders: PackedStringArray = data[1] if data.size() > 1 else PackedStringArray()
+			_add_log("pause   %s%s" % ["ON " if paused else "OFF", (" (" + ", ".join(holders) + ")") if not holders.is_empty() else ""])
 		_:
 			return false
 	return true
