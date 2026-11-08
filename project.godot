@@ -1,0 +1,25 @@
+; Development project for the Truss addon (addons/truss). Not needed to use Truss in a game.
+config_version=5
+
+[application]
+
+config/name="Truss"
+config/description="Development and test project for the Truss addon."
+config/features=PackedStringArray("4.5")
+
+[debug]
+
+; Strict profile for Truss's own code. On Godot 4.7+ directory_rules applies it to addons/truss only
+; (1 = include, 0 = exclude); tests and third-party addons are excluded. Godot 4.5 ignores directory_rules
+; and excludes all addons, so strictness is enforced by the 4.7 CI job.
+gdscript/warnings/untyped_declaration=2
+gdscript/warnings/unsafe_property_access=2
+gdscript/warnings/unsafe_method_access=2
+gdscript/warnings/unsafe_call_argument=2
+gdscript/warnings/unsafe_cast=1
+gdscript/warnings/directory_rules={
+"res://addons": 0,
+"res://addons/truss": 1,
+"res://tests": 0,
+"res://tools": 0
+}

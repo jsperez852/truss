@@ -86,7 +86,9 @@ prefer a batteries-included layered toolkit should look at GF.
 
 ## 6. Design
 
-API sketches below are **proposals, not yet verified**. They will be validated in M1.
+API sketches below were the proposals made in M0. The implemented API (M1: `core`, `di`, `messaging`) is documented in
+[docs/guide](../guide/) and may differ in details; for example, factories receive the resolving container as an argument
+because capturing the container in a lambda creates a reference cycle.
 
 ```
 addons/truss/
@@ -116,7 +118,7 @@ TrContracts.require(impl, InventoryStore)      # assert with a clear message if 
 ```gdscript
 var c := TrServiceContainer.new()
 c.singleton(InventoryStore, func() -> InventoryStore: return ConfigInventoryStore.new("user://inv.cfg"))
-c.transient(AddItem, func() -> AddItem: return AddItem.new(c.get_service(Inventory), c.get_service(InventoryStore)))
+c.transient(AddItem, func(s: TrServiceContainer) -> AddItem: return AddItem.new(s.get_service(Inventory), s.get_service(InventoryStore)))
 c.instance(Clock, SystemClock.new())
 
 var store := c.get_service(InventoryStore) as InventoryStore
@@ -214,7 +216,7 @@ A node-based hierarchical state machine with a transition history visible in the
 | Milestone | Content | Exit criteria |
 |---|---|---|
 | M0 | This RFC accepted, name and license decided, repository created | Decisions in section 11 closed ✅ |
-| M1 | `core` + `di` + synchronous `messaging` + benchmarks | Tests green on 4.5 and 4.7, performance table |
+| M1 ✅ | `core` + `di` + synchronous `messaging` + benchmarks | Tests green on 4.5 and 4.7, performance table |
 | M2 | `modules` + `TrBootstrap` + injector + minimal example | The example boots, and fails clearly on a cycle or a missing registration |
 | M3 | `tooling`: strict profile, `arch_check` v2, generators, marketplace skill | Example CI runs `arch_check` |
 | M4 | `fsm` + editor panel + `send_async` | Complete example game |

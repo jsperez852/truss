@@ -7,3 +7,6 @@
 .DS_Store
 Thumbs.db
 .vscode/
+# Test framework, installed by tools/install_gdunit.sh
+/addons/gdUnit4/
+/reports/

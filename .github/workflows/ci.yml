@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    name: Godot ${{ matrix.godot }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        godot: ["4.5.1", "4.7.2"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: chickensoft-games/setup-godot@v2
+        with:
+          version: ${{ matrix.godot }}
+          use-dotnet: false
+          include-templates: false
+
+      - name: Install gdUnit4
+        run: bash tools/install_gdunit.sh v6.2.3
+
+      - name: Import project
+        run: |
+          godot --headless --path . --import 2>&1 | tee import.log
+          ! grep -E "SCRIPT ERROR|Parse Error" import.log | grep -v "addons/gdUnit4"
+
+      # On Godot 4.7+ directory_rules applies the strict typing profile to addons/truss.
+      - name: Compile check (strict on 4.7+)
+        run: godot --headless --path . -s res://tools/compile_check.gd
+
+      - name: Unit tests (gdUnit4)
+        run: |
+          chmod +x addons/gdUnit4/runtest.sh
+          addons/gdUnit4/runtest.sh -a res://tests -c --headless --ignoreHeadlessMode
+        env:
+          GODOT_BIN: godot
+
+      - name: Benchmarks
+        if: matrix.godot == '4.7.2'
+        run: godot --headless --path . -s res://tools/bench.gd | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports-${{ matrix.godot }}
+          path: reports/
+          if-no-files-found: ignore
