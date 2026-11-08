@@ -54,6 +54,14 @@ jobs:
       - name: Exported build (TrRegistry in a .pck)
         run: GODOT="$GODOT" bash tools/test_export.sh
 
+      # The Asset Library and GitHub's "Download ZIP" use git archive: only addons/truss may be in it.
+      - name: Package contains only addons/truss
+        run: |
+          git archive --format=tar HEAD | tar -t > package.txt
+          ! grep -v '^addons/' package.txt
+          grep -q '^addons/truss/plugin.cfg$' package.txt
+          grep -q '^addons/truss/LICENSE$' package.txt
+
       - name: Guide snippets compile (strict)
         run: |
           command -v gawk || sudo apt-get install -y gawk
